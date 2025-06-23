@@ -194,7 +194,7 @@ class AFLDataPipeline:
         
         # Find all match data files
         for file_path in data_dir.rglob("*.csv"):
-            if "match" in file_path.name.lower():
+            if "matches" in file_path.name.lower():
                 match_files.append(file_path)
         
         if not match_files:
