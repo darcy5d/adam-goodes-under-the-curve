@@ -418,7 +418,7 @@ class AFLDataPipeline:
                           'clangers', 'free_kicks_for', 'free_kicks_against', 
                           'brownlow_votes', 'contested_possessions', 'uncontested_possessions',
                           'contested_marks', 'marks_inside_50', 'one_percenters', 
-                          'bounces', 'goal_assist', 'height', 'weight']
+                          'bounces', 'goal_assist', 'height', 'weight', 'round']
         
         for col in numeric_columns:
             if col in df.columns:
