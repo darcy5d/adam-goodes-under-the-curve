@@ -192,8 +192,8 @@ class AFLDataPipeline:
         match_files = []
         data_dir = repo_path / "data" / "matches"
         
-        # Find all match data files
-        for file_path in data_dir.rglob("*.csv"):
+        # Find all match data files directly in the matches directory
+        for file_path in data_dir.glob("*.csv"):
             if "matches" in file_path.name.lower():
                 match_files.append(file_path)
         
@@ -226,6 +226,8 @@ class AFLDataPipeline:
             'Date': 'date',
             'Home Team': 'home_team',
             'Away Team': 'away_team',
+            'team_1_team_name': 'home_team',
+            'team_2_team_name': 'away_team',
             'Home Team Goals by Quarter': 'home_team_goals_by_quarter',
             'Home Team Behinds by Quarter': 'home_team_behinds_by_quarter',
             'Away Team Goals by Quarter': 'away_team_goals_by_quarter',
@@ -234,8 +236,13 @@ class AFLDataPipeline:
             'Home Total Behinds': 'home_total_behinds',
             'Away Total Goals': 'away_total_goals',
             'Away Total Behinds': 'away_total_behinds',
+            'team_1_final_goals': 'home_total_goals',
+            'team_1_final_behinds': 'home_total_behinds',
+            'team_2_final_goals': 'away_total_goals',
+            'team_2_final_behinds': 'away_total_behinds',
             'Winning Team': 'winning_team',
-            'Margin': 'margin'
+            'Margin': 'margin',
+            'round_num': 'round'
         }
         
         matches_df = matches_df.rename(columns=column_mapping)
