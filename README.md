@@ -227,6 +227,11 @@ The EDA produced four comprehensive visualization sets:
    python eda_comprehensive.py
    ```
 
+6. **Navigate outputs** (optional)
+   ```bash
+   python navigate_outputs.py
+   ```
+
 ### Directory Structure
 
 ```
@@ -236,40 +241,73 @@ AFL2/
 ├── eda_analysis.py                     # Basic EDA analysis
 ├── feature_engineering_analysis.py     # Feature engineering strategy analysis
 ├── feature_engineering_pipeline.py     # Feature engineering implementation
+├── statistical_modeling_analysis.py    # Statistical modeling approach analysis
+├── statistical_modeling_framework.py   # Statistical modeling implementation
 ├── requirements.txt                    # Python dependencies
 ├── README.md                          # This file
-├── EDA_Report.md                      # Detailed EDA report
-├── Feature_Engineering_Report.md      # Feature engineering report
 ├── afl_data/                          # Data directory (created by pipeline)
 │   ├── AFL-Data-Analysis/             # Cloned repository
 │   ├── afl_database.db                # SQLite database
-│   ├── parquet/                       # Parquet backup files
-│   │   ├── matches.parquet
-│   │   └── players.parquet
-│   ├── quality_report.json            # Data quality report
-│   └── eda_output/                    # EDA visualizations and results
-│       ├── temporal_analysis.png
-│       ├── match_analysis.png
-│       ├── player_analysis.png
-│       ├── data_quality.png
-│       └── eda_analysis_results.json
-├── engineered_features.csv             # Complete engineered features dataset
-├── feature_importance.csv              # Feature importance rankings
-├── feature_importance.png              # Feature importance visualization
-├── feature_correlation_matrix.png      # Feature correlation heatmap
-├── feature_engineering_analysis_results.json  # Strategy analysis results
-├── feature_strategy_comparison.png     # Strategy comparison visualization
-├── statistical_modeling_analysis.py    # Statistical modeling approach analysis
-├── statistical_modeling_framework.py   # Statistical modeling implementation
-├── statistical_modeling_analysis_results.json # Approach analysis results
-├── statistical_modeling_summary.json   # Statistical modeling results
-├── Statistical_Modeling_Report.md      # Detailed statistical modeling report
-├── distribution_fitting_results.png    # Distribution fitting visualizations
-├── hierarchical_model_structure.png    # Hierarchical model visualization
-├── uncertainty_quantification_results.png # Uncertainty quantification visualization
-├── statistical_modeling_approach_comparison.png # Approach comparison visualization
-└── afl_pipeline.log                   # Pipeline execution log
+│   └── parquet/                       # Parquet backup files
+│       ├── matches.parquet
+│       └── players.parquet
+├── outputs/                           # All analysis outputs
+│   ├── visualizations/                # All generated visualizations
+│   │   ├── eda/                      # EDA visualizations
+│   │   │   ├── data_quality.png
+│   │   │   ├── match_analysis.png
+│   │   │   ├── player_analysis.png
+│   │   │   ├── temporal_analysis.png
+│   │   │   └── eda_analysis_results.json
+│   │   ├── feature_engineering/       # Feature engineering visualizations
+│   │   │   ├── feature_importance.png
+│   │   │   ├── feature_correlation_matrix.png
+│   │   │   └── feature_strategy_comparison.png
+│   │   └── statistical_modeling/      # Statistical modeling visualizations
+│   │       ├── distribution_fitting_results.png
+│   │       ├── hierarchical_model_structure.png
+│   │       ├── uncertainty_quantification_results.png
+│   │       └── statistical_modeling_approach_comparison.png
+│   ├── reports/                       # All generated reports
+│   │   ├── eda/                      # EDA reports
+│   │   │   └── EDA_Report.md
+│   │   ├── feature_engineering/       # Feature engineering reports
+│   │   │   └── Feature_Engineering_Report.md
+│   │   └── statistical_modeling/      # Statistical modeling reports
+│   │       └── Statistical_Modeling_Report.md
+│   └── data/                          # All generated data files
+│       ├── pipeline/                  # Pipeline outputs
+│       │   └── afl_pipeline.log
+│       ├── feature_engineering/       # Feature engineering data
+│       │   ├── engineered_features.csv
+│       │   ├── feature_importance.csv
+│       │   └── feature_engineering_analysis_results.json
+│       └── statistical_modeling/      # Statistical modeling data
+│           ├── statistical_modeling_analysis_results.json
+│           └── statistical_modeling_summary.json
+└── afl2_env/                          # Virtual environment
 ```
+
+### Organized Outputs
+
+All analysis outputs are now organized in the `outputs/` directory for better project structure:
+
+**📊 Visualizations** (`outputs/visualizations/`)
+- **EDA**: Data quality, match analysis, player analysis, temporal analysis
+- **Feature Engineering**: Feature importance, correlation matrix, strategy comparison
+- **Statistical Modeling**: Distribution fitting, hierarchical structure, uncertainty quantification
+
+**📄 Reports** (`outputs/reports/`)
+- **EDA**: Comprehensive EDA report with findings and insights
+- **Feature Engineering**: Feature engineering strategy and implementation report
+- **Statistical Modeling**: Statistical distribution modeling report
+
+**💾 Data Files** (`outputs/data/`)
+- **Pipeline**: Execution logs and pipeline outputs
+- **Feature Engineering**: Engineered features dataset, importance rankings, analysis results
+- **Statistical Modeling**: Distribution fitting results, hierarchical model data
+
+**🔍 Navigation**: Use `python navigate_outputs.py` to explore the organized outputs interactively.
 
 ## Project Status
 
