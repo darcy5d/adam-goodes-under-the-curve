@@ -1,0 +1,134 @@
+{
+  "distribution_fitting": {
+    "disposals": {
+      "best_distribution": "gamma",
+      "test_statistic": 0.032378127236730225,
+      "p_value": 1.0442965431620374e-237,
+      "data_points": 260513,
+      "mean": 16.071831348147693,
+      "std": 6.883138118652869
+    },
+    "kicks": {
+      "best_distribution": "weibull",
+      "test_statistic": 0.045604204011452265,
+      "p_value": 0.0,
+      "data_points": 260513,
+      "mean": 9.599048799867953,
+      "std": 4.620761055669131
+    },
+    "marks": {
+      "best_distribution": "normal",
+      "test_statistic": 0.14234568451567747,
+      "p_value": 0.0,
+      "data_points": 260513,
+      "mean": 4.19596334923785,
+      "std": 2.474660361915859
+    },
+    "handballs": {
+      "best_distribution": "lognormal",
+      "test_statistic": 0.0668122369677,
+      "p_value": 0.0,
+      "data_points": 260513,
+      "mean": 6.47278254827974,
+      "std": 4.008033436190496
+    },
+    "goals": {
+      "best_distribution": "None",
+      "test_statistic": null,
+      "p_value": null,
+      "data_points": 95178,
+      "mean": 1.702956565592889,
+      "std": 1.1306528876755733
+    },
+    "tackles": {
+      "best_distribution": "normal",
+      "test_statistic": 0.20659546383158273,
+      "p_value": 0.0,
+      "data_points": 214264,
+      "mean": 2.8275118545345928,
+      "std": 1.9390819353499558
+    }
+  },
+  "hierarchical_modeling": {
+    "disposals": {
+      "round_level_n": 25,
+      "team_level_n": 22,
+      "era_level_n": 4,
+      "round_mean": 16.140082805430485,
+      "team_mean": 16.00563976457785,
+      "era_mean": 16.003230834442498
+    },
+    "kicks": {
+      "round_level_n": 25,
+      "team_level_n": 22,
+      "era_level_n": 4,
+      "round_mean": 9.617377820273218,
+      "team_mean": 9.636465477750214,
+      "era_mean": 9.610332688175834
+    },
+    "marks": {
+      "round_level_n": 25,
+      "team_level_n": 22,
+      "era_level_n": 4,
+      "round_mean": 4.2025445461531135,
+      "team_mean": 4.124267721826691,
+      "era_mean": 4.165497939162699
+    },
+    "handballs": {
+      "round_level_n": 25,
+      "team_level_n": 22,
+      "era_level_n": 4,
+      "round_mean": 6.5227049851572705,
+      "team_mean": 6.369174286827635,
+      "era_mean": 6.392898146266662
+    }
+  },
+  "team_performance": {
+    "disposals": {
+      "n_teams": 22,
+      "n_years": 35,
+      "total_observations": 585,
+      "best_fit_totals": "normal",
+      "best_fit_averages": "weibull"
+    },
+    "kicks": {
+      "n_teams": 22,
+      "n_years": 35,
+      "total_observations": 585,
+      "best_fit_totals": "normal",
+      "best_fit_averages": "gamma"
+    },
+    "marks": {
+      "n_teams": 22,
+      "n_years": 35,
+      "total_observations": 585,
+      "best_fit_totals": "normal",
+      "best_fit_averages": "lognormal"
+    },
+    "handballs": {
+      "n_teams": 22,
+      "n_years": 35,
+      "total_observations": 585,
+      "best_fit_totals": "normal",
+      "best_fit_averages": "weibull"
+    },
+    "goals": {
+      "n_teams": 22,
+      "n_years": 35,
+      "total_observations": 585,
+      "best_fit_totals": "weibull",
+      "best_fit_averages": "lognormal"
+    },
+    "tackles": {
+      "n_teams": 22,
+      "n_years": 35,
+      "total_observations": 585,
+      "best_fit_totals": "weibull",
+      "best_fit_averages": "weibull"
+    }
+  },
+  "uncertainty_quantification": {
+    "monte_carlo_stats": 3,
+    "uncertainty_propagation_stats": 0
+  }
+}
