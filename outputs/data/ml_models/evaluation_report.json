@@ -13,104 +13,104 @@
     "traditional_metrics": {
       "traditional_ml": {
         "classification": {
-          "accuracy": 0.8841269841269841,
-          "precision": 0.8306878306878307,
-          "recall": 0.9721362229102167,
-          "f1_score": 0.8958630527817404
+          "accuracy": 0.8111111111111111,
+          "precision": 0.7670157068062827,
+          "recall": 0.9071207430340558,
+          "f1_score": 0.8312056737588652
         },
         "regression": {
-          "mae": 0.06988479536398039,
-          "rmse": 0.2459872925202266,
-          "r2_score": 0.9984147297862732
+          "mae": 2.202241704272966,
+          "rmse": 2.7722063582809917,
+          "r2_score": 0.7986604631382076
         }
       },
       "ensemble_ml": {
         "classification": {
-          "accuracy": 1.0,
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1_score": 1.0
+          "accuracy": 0.834920634920635,
+          "precision": 0.8,
+          "recall": 0.9040247678018576,
+          "f1_score": 0.8488372093023255
         },
         "regression": {
-          "mae": 9.658887446475785e-13,
-          "rmse": 1.2275985153494978e-12,
-          "r2_score": 1.0
+          "mae": 2.0866415877997273,
+          "rmse": 2.6347202289744343,
+          "r2_score": 0.8181359046944563
         }
       },
       "deep_learning": {
         "classification": {
-          "accuracy": 0.9587301587301588,
-          "precision": 0.9541284403669725,
-          "recall": 0.9659442724458205,
-          "f1_score": 0.96
+          "accuracy": 0.8047619047619048,
+          "precision": 0.7873563218390804,
+          "recall": 0.848297213622291,
+          "f1_score": 0.8166915052160953
         },
         "regression": {
-          "mae": 0.6264518347359987,
-          "rmse": 0.7935604234851574,
-          "r2_score": 0.9835017471314365
+          "mae": 3.007584757732506,
+          "rmse": 3.793432468475323,
+          "r2_score": 0.6229988553225039
         }
       }
     },
     "probabilistic_metrics": {
       "traditional_ml": {
-        "brier_score": 0.16562278684440473,
-        "log_likelihood": -0.5170589648666696,
-        "mean_probability": 0.5185946941298175,
-        "probability_std": 0.1295690547136864
+        "brier_score": 0.1692676576228621,
+        "log_likelihood": -0.5213575988131721,
+        "mean_probability": 0.5314538803611343,
+        "probability_std": 0.14842251827546823
       },
       "ensemble_ml": {
-        "brier_score": 0.17163360007513756,
-        "log_likelihood": -0.5306046357237291,
-        "mean_probability": 0.5168034188034112,
-        "probability_std": 0.11874737867149134
+        "brier_score": 0.17628099351302998,
+        "log_likelihood": -0.5384842404394125,
+        "mean_probability": 0.5281703526873919,
+        "probability_std": 0.12931064436878348
       },
       "deep_learning": {
-        "brier_score": 0.16950762196448826,
-        "log_likelihood": -0.5252310821754527,
-        "mean_probability": 0.515963077010229,
-        "probability_std": 0.12656470417324112
+        "brier_score": 0.17757715072376387,
+        "log_likelihood": -0.5378239288252007,
+        "mean_probability": 0.5063682788555898,
+        "probability_std": 0.15476916907676727
       }
     },
     "domain_specific_metrics": {
       "traditional_ml": {
         "all_games": {
-          "winner_accuracy": 0.8841269841269841,
+          "winner_accuracy": 0.8111111111111111,
           "margin_accuracy_10": 1.0,
-          "mean_margin_error": 0.06988479536398039,
+          "mean_margin_error": 2.202241704272966,
           "sample_size": 630
         },
         "close_games": {
-          "winner_accuracy": 0.8726003490401396,
+          "winner_accuracy": 0.7923211169284468,
           "margin_accuracy_10": 1.0,
-          "mean_margin_error": 0.039600732532130374,
+          "mean_margin_error": 2.1278599349915,
           "sample_size": 573
         }
       },
       "ensemble_ml": {
         "all_games": {
-          "winner_accuracy": 1.0,
+          "winner_accuracy": 0.834920634920635,
           "margin_accuracy_10": 1.0,
-          "mean_margin_error": 9.658887446475785e-13,
+          "mean_margin_error": 2.0866415877997273,
           "sample_size": 630
         },
         "close_games": {
-          "winner_accuracy": 1.0,
+          "winner_accuracy": 0.8184991273996509,
           "margin_accuracy_10": 1.0,
-          "mean_margin_error": 9.481362757158765e-13,
+          "mean_margin_error": 2.0258991641843127,
           "sample_size": 573
         }
       },
       "deep_learning": {
         "all_games": {
-          "winner_accuracy": 0.9587301587301588,
-          "margin_accuracy_10": 1.0,
-          "mean_margin_error": 0.6264518347359987,
+          "winner_accuracy": 0.8047619047619048,
+          "margin_accuracy_10": 0.9904761904761905,
+          "mean_margin_error": 3.007584757732506,
           "sample_size": 630
         },
         "close_games": {
-          "winner_accuracy": 0.9546247818499127,
-          "margin_accuracy_10": 1.0,
-          "mean_margin_error": 0.6219384025590294,
+          "winner_accuracy": 0.7853403141361257,
+          "margin_accuracy_10": 0.9930191972076788,
+          "mean_margin_error": 2.948271026689714,
           "sample_size": 573
         }
       }
@@ -119,103 +119,103 @@
       "traditional_ml": {
         "temporal_performance": {
           "train": {
-            "winner_accuracy": 0.9803505045140732,
-            "margin_mae": 0.04291111084657917,
+            "winner_accuracy": 0.9513188174898212,
+            "margin_mae": 1.4209045179194877,
             "sample_size": 5649
           },
           "val": {
-            "winner_accuracy": 0.8841269841269841,
-            "margin_mae": 0.06988479536398039,
+            "winner_accuracy": 0.8111111111111111,
+            "margin_mae": 2.202241704272966,
             "sample_size": 630
           },
           "test": {
-            "winner_accuracy": 0.8641975308641975,
-            "margin_mae": 0.054719048384147075,
+            "winner_accuracy": 0.8024691358024691,
+            "margin_mae": 2.263734918921384,
             "sample_size": 243
           }
         },
         "temporal_stability": {
-          "winner_accuracy_variance": 0.0025719624745274322,
-          "margin_mae_variance": 0.00012188965853241318,
-          "winner_accuracy_trend": -0.11615297364987576,
-          "margin_mae_trend": 0.011807937537567904
+          "winner_accuracy_variance": 0.004654345822626641,
+          "margin_mae_variance": 0.14718136656439818,
+          "winner_accuracy_trend": -0.14884968168735202,
+          "margin_mae_trend": 0.8428304010018961
         }
       },
       "ensemble_ml": {
         "temporal_performance": {
           "train": {
-            "winner_accuracy": 1.0,
-            "margin_mae": 1.0709823696834443e-12,
+            "winner_accuracy": 0.9929191007257921,
+            "margin_mae": 1.8567374833313859,
             "sample_size": 5649
           },
           "val": {
-            "winner_accuracy": 1.0,
-            "margin_mae": 9.658887446475785e-13,
+            "winner_accuracy": 0.834920634920635,
+            "margin_mae": 2.0866415877997273,
             "sample_size": 630
           },
           "test": {
-            "winner_accuracy": 1.0,
-            "margin_mae": 1.5766341136168288e-12,
+            "winner_accuracy": 0.8518518518518519,
+            "margin_mae": 2.1773607886788042,
             "sample_size": 243
           }
         },
         "temporal_stability": {
-          "winner_accuracy_variance": 0.0,
-          "margin_mae_variance": 7.108202909815976e-26,
-          "winner_accuracy_trend": 0.0,
-          "margin_mae_trend": 5.056517439333845e-13
+          "winner_accuracy_variance": 0.005016683334268618,
+          "margin_mae_variance": 0.01820946384349247,
+          "winner_accuracy_trend": -0.1410672488739403,
+          "margin_mae_trend": 0.32062330534741834
         }
       },
       "deep_learning": {
         "temporal_performance": {
           "train": {
             "winner_accuracy": 1.0,
-            "margin_mae": 0.18301978498936944,
+            "margin_mae": 0.48659617482871176,
             "sample_size": 5649
           },
           "val": {
-            "winner_accuracy": 0.9587301587301588,
-            "margin_mae": 0.6264518347359987,
+            "winner_accuracy": 0.8047619047619048,
+            "margin_mae": 3.007584757732506,
             "sample_size": 630
           },
           "test": {
-            "winner_accuracy": 0.9547325102880658,
-            "margin_mae": 0.7759659550292162,
+            "winner_accuracy": 0.7818930041152263,
+            "margin_mae": 3.2643336830668597,
             "sample_size": 243
           }
         },
         "temporal_stability": {
-          "winner_accuracy_variance": 0.0004187029573693917,
-          "margin_mae_variance": 0.06339684616383051,
-          "winner_accuracy_trend": -0.04526748971193417,
-          "margin_mae_trend": 0.5929461700398467
+          "winner_accuracy_variance": 0.009579062455874207,
+          "margin_mae_variance": 1.570792123384967,
+          "winner_accuracy_trend": -0.21810699588477367,
+          "margin_mae_trend": 2.7777375082381477
         }
       }
     }
   },
   "model_comparisons": {
     "traditional_ml_vs_ensemble_ml": {
-      "winner_accuracy_diff": -0.1158730158730159,
-      "margin_mae_diff": 0.06988479536301449,
-      "winner_significance_p": 3.881045974665939e-18,
-      "margin_significance_p": 1.9783230225742167e-13,
-      "winner_significant": "True",
-      "margin_significant": "True"
+      "winner_accuracy_diff": -0.023809523809523836,
+      "margin_mae_diff": 0.11560011647323876,
+      "winner_significance_p": 0.30141336123768614,
+      "margin_significance_p": 0.21336682083222405,
+      "winner_significant": "False",
+      "margin_significant": "False"
     },
     "traditional_ml_vs_deep_learning": {
-      "winner_accuracy_diff": -0.07460317460317467,
-      "margin_mae_diff": -0.5565670393720183,
-      "winner_significance_p": 1.4627818611531787e-06,
-      "margin_significance_p": 4.302647870102203e-118,
-      "winner_significant": "True",
+      "winner_accuracy_diff": 0.006349206349206327,
+      "margin_mae_diff": -0.80534305345954,
+      "winner_significance_p": 0.8301195529329599,
+      "margin_significance_p": 2.7062523798538763e-12,
+      "winner_significant": "False",
       "margin_significant": "True"
     },
     "ensemble_ml_vs_deep_learning": {
-      "winner_accuracy_diff": 0.041269841269841234,
-      "margin_mae_diff": -0.6264518347350329,
-      "winner_significance_p": 7.259656084801361e-07,
-      "margin_significance_p": 8.029745707216674e-167,
-      "winner_significant": "True",
+      "winner_accuracy_diff": 0.030158730158730163,
+      "margin_mae_diff": -0.9209431699327788,
+      "winner_significance_p": 0.187016938128213,
+      "margin_significance_p": 5.834191958789408e-16,
+      "winner_significant": "False",
       "margin_significant": "True"
     }
   },

@@ -63,8 +63,9 @@ class MLTrainingPipeline:
         
     def _prepare_features_and_targets(self):
         """Prepare features and targets for all datasets."""
-        # Feature columns (exclude metadata and targets)
-        exclude_cols = ['year', 'date', 'home_team', 'away_team', 'margin', 'round', 'venue', 'attendance', 'match_id']
+        # Feature columns (exclude metadata, targets, and data leakage features)
+        exclude_cols = ['year', 'date', 'home_team', 'away_team', 'margin', 'round', 'venue', 'attendance', 'match_id',
+                       'home_total_goals', 'away_total_goals', 'home_total_behinds', 'away_total_behinds']
         feature_cols = [col for col in self.features_df.columns if col not in exclude_cols]
         
         # Prepare each dataset
