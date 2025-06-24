@@ -1,13 +1,14 @@
-# AFL Prediction Model - Data Pipeline
+# AFL Prediction Model - Data Pipeline & Analysis
 
 ## Project Overview
 
-This project implements a comprehensive data pipeline for building an AFL (Australian Football League) prediction model. The pipeline extracts, validates, and stores historical AFL data from 1897 to 2025, providing a robust foundation for machine learning models.
+This project implements a comprehensive data pipeline and exploratory analysis for building an AFL (Australian Football League) prediction model. The pipeline extracts, validates, and stores historical AFL data from 1897 to 2025, providing a robust foundation for machine learning models.
 
 ### Objectives
 
 - **Data Foundation**: Establish a reliable, validated dataset of AFL match and player statistics
 - **Data Quality**: Implement comprehensive validation and quality checks
+- **Exploratory Analysis**: Conduct thorough EDA to understand patterns and inform model development
 - **Performance**: Optimize data storage and query performance
 - **Extensibility**: Design for future model development and data updates
 - **Reproducibility**: Ensure consistent data processing across environments
@@ -17,6 +18,19 @@ This project implements a comprehensive data pipeline for building an AFL (Austr
 - **Primary Source**: [AFL-Data-Analysis Repository](https://github.com/akareen/AFL-Data-Analysis)
 - **Data Coverage**: 1897-2025 (historical to current)
 - **Data Types**: Match results, player statistics, team performance
+
+### Current Dataset Statistics
+
+| Metric | Value |
+|--------|-------|
+| **Total Matches** | 16,649 |
+| **Total Player Records** | 670,839 |
+| **Year Range** | 1897-2025 (129 years) |
+| **Unique Teams** | 25 (matches), 24 (players) |
+| **Unique Venues** | 50 |
+| **Database Size** | ~43.5 MB |
+
+## Phase 1A: Data Pipeline Implementation
 
 ### Data Structure
 
@@ -88,6 +102,60 @@ players (
 )
 ```
 
+## Phase 1B: Exploratory Data Analysis
+
+### EDA Methodology
+
+The comprehensive EDA implemented four distinct analytical approaches:
+
+1. **Statistical Summary Approach**: Descriptive statistics, distributions, and central tendency measures
+2. **Visual Exploration Approach**: Trend analysis, relationship mapping, and pattern identification
+3. **Time Series Analysis**: Temporal patterns, seasonality, and era-based comparisons
+4. **Data Quality Assessment**: Missing data analysis, outlier detection, and consistency checks
+
+### Key Findings
+
+#### Temporal Analysis
+- **Data Growth**: Modern era (1991-2025) shows 2x more matches per year compared to early era
+- **Scoring Evolution**: Gradual increase from 20.0 (early era) to 26.4 (modern era) total goals per match
+- **Home Advantage Stability**: Remarkably consistent ~1.1 goal advantage across all eras
+- **Seasonal Patterns**: Round 22 shows highest scoring, Grand Final shows lowest
+
+#### Match Analysis
+- **Home Advantage**: Consistent 1.1 goals across all eras (Early: 1.1, Mid: 1.1, Modern: 1.2)
+- **Scoring Distribution**: Normal distribution centered around 24 total goals
+- **Margin Distribution**: Slightly right-skewed, indicating some high-scoring games
+- **Round Patterns**: Finals games show lower scoring (defensive play)
+
+#### Player Analysis
+- **Core Statistics Completeness**: Kicks (62%), Marks (58%), Handballs (60%), Disposals (63%)
+- **Performance Distributions**: Normal distributions with expected outliers
+- **Career Longevity**: Average 3.2 years, with modern era showing longer careers
+- **Outlier Analysis**: Goals show 9.1% outliers, disposals show 0.6% outliers
+
+#### Data Quality Assessment
+- **Match Data Quality**: 3.9% missing rate overall, core data highly complete
+- **Player Data Quality**: 54.1% missing rate, but core statistics >50% complete
+- **Data Consistency**: 100% year overlap, 96% team consistency between datasets
+- **Problematic Columns**: Attendance (89% missing), Brownlow votes (97% missing)
+
+### Era Comparison
+
+| Era | Period | Matches | Avg Matches/Year | Home Goals | Away Goals | Home Advantage |
+|-----|--------|---------|------------------|------------|------------|----------------|
+| **Early Era** | 1897-1950 | 4,983 | 92.3 | 10.6 | 9.4 | 1.1 |
+| **Mid Era** | 1951-1990 | 5,144 | 128.6 | 13.3 | 12.2 | 1.1 |
+| **Modern Era** | 1991-2025 | 6,522 | 186.3 | 13.8 | 12.6 | 1.2 |
+
+### Visualizations Generated
+
+The EDA produced four comprehensive visualization sets:
+
+1. **Temporal Analysis** (`eda_output/temporal_analysis.png`): Data volume and scoring trends over time
+2. **Match Analysis** (`eda_output/match_analysis.png`): Home advantage and scoring distributions
+3. **Player Analysis** (`eda_output/player_analysis.png`): Performance distributions and career patterns
+4. **Data Quality** (`eda_output/data_quality.png`): Missing data patterns and outlier analysis
+
 ## Technology Decisions & Rationale
 
 ### 1. Data Storage Analysis
@@ -137,19 +205,25 @@ players (
    cd AFL2
    ```
 
-2. **Install dependencies**
+2. **Create virtual environment**
+   ```bash
+   python -m venv afl2_env
+   source afl2_env/bin/activate  # On Windows: afl2_env\Scripts\activate
+   ```
+
+3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Run the data pipeline**
+4. **Run the data pipeline**
    ```bash
    python data_pipeline.py
    ```
 
-4. **Generate analysis and visualizations**
+5. **Run comprehensive EDA**
    ```bash
-   python data_analysis.py
+   python eda_comprehensive.py
    ```
 
 ### Directory Structure
@@ -157,132 +231,125 @@ players (
 ```
 AFL2/
 ├── data_pipeline.py          # Main data pipeline
-├── data_analysis.py          # Data analysis and visualization
+├── eda_comprehensive.py      # Comprehensive EDA analysis
+├── eda_analysis.py           # Basic EDA analysis
 ├── requirements.txt          # Python dependencies
 ├── README.md                # This file
+├── EDA_Report.md            # Detailed EDA report
 ├── afl_data/                # Data directory (created by pipeline)
 │   ├── AFL-Data-Analysis/   # Cloned repository
 │   ├── afl_database.db      # SQLite database
 │   ├── parquet/             # Parquet backup files
 │   │   ├── matches.parquet
 │   │   └── players.parquet
-│   ├── plots/               # Generated visualizations
 │   ├── quality_report.json  # Data quality report
-│   └── analysis_report.json # Analysis results
+│   └── eda_output/          # EDA visualizations and results
+│       ├── temporal_analysis.png
+│       ├── match_analysis.png
+│       ├── player_analysis.png
+│       ├── data_quality.png
+│       └── eda_analysis_results.json
 └── afl_pipeline.log         # Pipeline execution log
 ```
 
 ## Current Progress
 
-### ✅ Completed
+### ✅ Phase 1A: Data Pipeline (COMPLETED)
 
 - [x] **Data Pipeline Architecture**: Complete pipeline with modular design
 - [x] **Repository Integration**: Automated cloning and updating of AFL data repository
-- [x] **Data Loading**: Robust CSV file discovery and loading
+- [x] **Data Loading**: Robust CSV file discovery and loading with column mapping
 - [x] **Data Validation**: Comprehensive schema and statistical validation
 - [x] **Database Setup**: SQLite database with proper indexing
 - [x] **Data Storage**: Dual storage (SQLite + Parquet) for reliability
 - [x] **Quality Reporting**: Automated data quality metrics and reporting
-- [x] **Data Analysis**: Statistical analysis and visualization generation
 - [x] **Performance Benchmarks**: Query performance and storage efficiency metrics
 - [x] **Logging**: Comprehensive logging throughout the pipeline
 
-### 🔄 In Progress
+### ✅ Phase 1B: Exploratory Data Analysis (COMPLETED)
 
-- [ ] **Data Pipeline Execution**: Running the pipeline to populate the database
-- [ ] **Data Quality Assessment**: Evaluating the quality of loaded data
-- [ ] **Performance Optimization**: Fine-tuning based on actual data volumes
+- [x] **Statistical Summary Analysis**: Descriptive statistics and distributions
+- [x] **Visual Exploration**: Trend analysis and pattern identification
+- [x] **Time Series Analysis**: Temporal patterns and era comparisons
+- [x] **Data Quality Assessment**: Missing data and outlier analysis
+- [x] **Comprehensive Visualizations**: Four detailed visualization sets
+- [x] **Recommendations**: Clear guidance for model development
+- [x] **Detailed Report**: Complete EDA report with findings and insights
 
-### 📋 Next Steps
+### 📋 Phase 2: Feature Engineering & Model Development (NEXT)
 
-1. **Execute Pipeline**: Run the data pipeline to populate the database
-2. **Validate Results**: Review data quality reports and address any issues
-3. **Performance Testing**: Benchmark with actual data volumes
-4. **Feature Engineering**: Create derived features for prediction models
-5. **Model Development**: Implement machine learning models
-6. **API Development**: Create REST API for data access
-7. **Dashboard**: Build web dashboard for data exploration
+1. **Feature Engineering**: Create derived features based on EDA insights
+2. **Data Preprocessing**: Implement era-specific imputation and normalization
+3. **Model Development**: Build prediction models using reliable data subsets
+4. **Validation Strategy**: Use recommended timeline (1991-2020 train, 2021-2023 validate, 2024-2025 test)
 
-## Data Quality & Performance
+## Key Recommendations for Phase 2
 
-### Data Quality Metrics
+### Reliable Data Subsets
 
-The pipeline generates comprehensive quality reports including:
+**Primary Training Data (1991-2025):**
+- Most complete and consistent data
+- Relevant to current game rules
+- Core statistics >50% complete
 
-- **Missing Values**: Percentage of missing data by column
-- **Invalid Values**: Out-of-range or malformed data
-- **Outliers**: Statistical outliers in numerical fields
-- **Duplicates**: Duplicate record identification
-- **Date Range**: Temporal coverage validation
-- **Team/Venue Coverage**: Entity completeness
+**Secondary Training Data (1951-1990):**
+- Good for historical patterns
+- Balanced data quality
+- Useful for trend analysis
 
-### Performance Benchmarks
+**Avoid for Training (1897-1950):**
+- Inconsistent data quality
+- Different game rules
+- Limited statistical recording
 
-- **Database Size**: Optimized storage with compression
-- **Query Performance**: Indexed queries for fast retrieval
-- **Load Time**: Efficient batch processing
-- **Memory Usage**: Optimized for large datasets
+### Most Predictive Features
 
-### Sample Queries
+**Recommended (Completeness >50%):**
+1. **Kicks** (62% complete) - Core possession metric
+2. **Marks** (58% complete) - Key defensive/offensive stat
+3. **Handballs** (60% complete) - Possession chain metric
+4. **Disposals** (63% complete) - Total possession metric
 
-```sql
--- Total matches by year
-SELECT year, COUNT(*) FROM matches GROUP BY year ORDER BY year;
+**Secondary (Completeness 30-50%):**
+- Goals (32% complete) - Scoring metric
+- Tackles (36% complete) - Defensive metric
 
--- Top goal kickers
-SELECT first_name, last_name, SUM(goals) as total_goals 
-FROM players 
-GROUP BY first_name, last_name 
-ORDER BY total_goals DESC 
-LIMIT 10;
+### Preprocessing Strategies
 
--- Recent match results
-SELECT * FROM matches 
-WHERE year >= 2020 
-ORDER BY date DESC 
-LIMIT 100;
-```
+1. **Missing Value Handling**: Era-specific imputation for statistical columns
+2. **Outlier Management**: Remove statistical outliers using IQR method
+3. **Feature Engineering**: Efficiency ratios, era-normalized statistics
+4. **Data Normalization**: Standardize statistics by era to account for rule changes
+
+### Model Training Timeline
+
+- **Training**: 1991-2020 (30 years of modern data)
+- **Validation**: 2021-2023 (3 years)
+- **Testing**: 2024-2025 (2 years)
 
 ## Issues Encountered & Solutions
 
-### 1. Historical Data Inconsistencies
+### Data Loading Challenges
 
-**Issue**: Data from 1897-1950s has different formats and missing fields
-**Solution**: Implemented flexible column mapping and robust data type conversion
+1. **Column Mapping Issues**: Fixed column name mapping for match data (`team_1_team_name` → `home_team`)
+2. **File Discovery**: Updated file pattern matching for correct data file identification
+3. **Data Type Conversion**: Added proper numeric conversion for all statistical columns
 
-### 2. Large Dataset Performance
+### Data Quality Issues
 
-**Issue**: Processing 100+ years of data can be memory-intensive
-**Solution**: Implemented batch processing and efficient data structures
+1. **Missing Data**: Identified and documented missing data patterns by era
+2. **Outliers**: Implemented statistical outlier detection and analysis
+3. **Consistency**: Verified data consistency between match and player datasets
 
-### 3. Data Source Reliability
+## Next Steps
 
-**Issue**: External repository may change structure
-**Solution**: Added comprehensive error handling and fallback mechanisms
-
-### 4. Missing Data Handling
-
-**Issue**: Historical records have varying completeness
-**Solution**: Implemented statistical validation with domain-specific rules
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Implement changes with comprehensive testing
-4. Update documentation
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact
-
-For questions or contributions, please open an issue on the repository.
+1. **Feature Engineering**: Create derived features based on EDA insights
+2. **Data Preprocessing**: Implement recommended preprocessing strategies
+3. **Model Development**: Build prediction models using reliable data subsets
+4. **Validation**: Use recommended timeline for realistic performance assessment
+5. **Deployment**: Prepare model for production use
 
 ---
 
-**Last Updated**: December 2024  
-**Status**: Phase 1A - Data Foundation Complete  
-**Next Phase**: Phase 1B - Feature Engineering 
+*Last updated: June 24, 2025*  
+*Phase 1A & 1B completed successfully* 
