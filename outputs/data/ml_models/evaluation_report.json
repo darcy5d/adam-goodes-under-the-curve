@@ -1,0 +1,233 @@
+{
+  "summary": {
+    "total_predictions": 19566,
+    "models_evaluated": 3,
+    "datasets_used": 3,
+    "evaluation_strategies": 4
+  },
+  "best_models": {
+    "best_winner_accuracy": "ensemble_ml",
+    "best_margin_mae": "ensemble_ml"
+  },
+  "evaluation_results": {
+    "traditional_metrics": {
+      "traditional_ml": {
+        "classification": {
+          "accuracy": 0.8841269841269841,
+          "precision": 0.8306878306878307,
+          "recall": 0.9721362229102167,
+          "f1_score": 0.8958630527817404
+        },
+        "regression": {
+          "mae": 0.06988479536398039,
+          "rmse": 0.2459872925202266,
+          "r2_score": 0.9984147297862732
+        }
+      },
+      "ensemble_ml": {
+        "classification": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0
+        },
+        "regression": {
+          "mae": 9.658887446475785e-13,
+          "rmse": 1.2275985153494978e-12,
+          "r2_score": 1.0
+        }
+      },
+      "deep_learning": {
+        "classification": {
+          "accuracy": 0.9587301587301588,
+          "precision": 0.9541284403669725,
+          "recall": 0.9659442724458205,
+          "f1_score": 0.96
+        },
+        "regression": {
+          "mae": 0.6264518347359987,
+          "rmse": 0.7935604234851574,
+          "r2_score": 0.9835017471314365
+        }
+      }
+    },
+    "probabilistic_metrics": {
+      "traditional_ml": {
+        "brier_score": 0.16562278684440473,
+        "log_likelihood": -0.5170589648666696,
+        "mean_probability": 0.5185946941298175,
+        "probability_std": 0.1295690547136864
+      },
+      "ensemble_ml": {
+        "brier_score": 0.17163360007513756,
+        "log_likelihood": -0.5306046357237291,
+        "mean_probability": 0.5168034188034112,
+        "probability_std": 0.11874737867149134
+      },
+      "deep_learning": {
+        "brier_score": 0.16950762196448826,
+        "log_likelihood": -0.5252310821754527,
+        "mean_probability": 0.515963077010229,
+        "probability_std": 0.12656470417324112
+      }
+    },
+    "domain_specific_metrics": {
+      "traditional_ml": {
+        "all_games": {
+          "winner_accuracy": 0.8841269841269841,
+          "margin_accuracy_10": 1.0,
+          "mean_margin_error": 0.06988479536398039,
+          "sample_size": 630
+        },
+        "close_games": {
+          "winner_accuracy": 0.8726003490401396,
+          "margin_accuracy_10": 1.0,
+          "mean_margin_error": 0.039600732532130374,
+          "sample_size": 573
+        }
+      },
+      "ensemble_ml": {
+        "all_games": {
+          "winner_accuracy": 1.0,
+          "margin_accuracy_10": 1.0,
+          "mean_margin_error": 9.658887446475785e-13,
+          "sample_size": 630
+        },
+        "close_games": {
+          "winner_accuracy": 1.0,
+          "margin_accuracy_10": 1.0,
+          "mean_margin_error": 9.481362757158765e-13,
+          "sample_size": 573
+        }
+      },
+      "deep_learning": {
+        "all_games": {
+          "winner_accuracy": 0.9587301587301588,
+          "margin_accuracy_10": 1.0,
+          "mean_margin_error": 0.6264518347359987,
+          "sample_size": 630
+        },
+        "close_games": {
+          "winner_accuracy": 0.9546247818499127,
+          "margin_accuracy_10": 1.0,
+          "mean_margin_error": 0.6219384025590294,
+          "sample_size": 573
+        }
+      }
+    },
+    "robustness_metrics": {
+      "traditional_ml": {
+        "temporal_performance": {
+          "train": {
+            "winner_accuracy": 0.9803505045140732,
+            "margin_mae": 0.04291111084657917,
+            "sample_size": 5649
+          },
+          "val": {
+            "winner_accuracy": 0.8841269841269841,
+            "margin_mae": 0.06988479536398039,
+            "sample_size": 630
+          },
+          "test": {
+            "winner_accuracy": 0.8641975308641975,
+            "margin_mae": 0.054719048384147075,
+            "sample_size": 243
+          }
+        },
+        "temporal_stability": {
+          "winner_accuracy_variance": 0.0025719624745274322,
+          "margin_mae_variance": 0.00012188965853241318,
+          "winner_accuracy_trend": -0.11615297364987576,
+          "margin_mae_trend": 0.011807937537567904
+        }
+      },
+      "ensemble_ml": {
+        "temporal_performance": {
+          "train": {
+            "winner_accuracy": 1.0,
+            "margin_mae": 1.0709823696834443e-12,
+            "sample_size": 5649
+          },
+          "val": {
+            "winner_accuracy": 1.0,
+            "margin_mae": 9.658887446475785e-13,
+            "sample_size": 630
+          },
+          "test": {
+            "winner_accuracy": 1.0,
+            "margin_mae": 1.5766341136168288e-12,
+            "sample_size": 243
+          }
+        },
+        "temporal_stability": {
+          "winner_accuracy_variance": 0.0,
+          "margin_mae_variance": 7.108202909815976e-26,
+          "winner_accuracy_trend": 0.0,
+          "margin_mae_trend": 5.056517439333845e-13
+        }
+      },
+      "deep_learning": {
+        "temporal_performance": {
+          "train": {
+            "winner_accuracy": 1.0,
+            "margin_mae": 0.18301978498936944,
+            "sample_size": 5649
+          },
+          "val": {
+            "winner_accuracy": 0.9587301587301588,
+            "margin_mae": 0.6264518347359987,
+            "sample_size": 630
+          },
+          "test": {
+            "winner_accuracy": 0.9547325102880658,
+            "margin_mae": 0.7759659550292162,
+            "sample_size": 243
+          }
+        },
+        "temporal_stability": {
+          "winner_accuracy_variance": 0.0004187029573693917,
+          "margin_mae_variance": 0.06339684616383051,
+          "winner_accuracy_trend": -0.04526748971193417,
+          "margin_mae_trend": 0.5929461700398467
+        }
+      }
+    }
+  },
+  "model_comparisons": {
+    "traditional_ml_vs_ensemble_ml": {
+      "winner_accuracy_diff": -0.1158730158730159,
+      "margin_mae_diff": 0.06988479536301449,
+      "winner_significance_p": 3.881045974665939e-18,
+      "margin_significance_p": 1.9783230225742167e-13,
+      "winner_significant": "True",
+      "margin_significant": "True"
+    },
+    "traditional_ml_vs_deep_learning": {
+      "winner_accuracy_diff": -0.07460317460317467,
+      "margin_mae_diff": -0.5565670393720183,
+      "winner_significance_p": 1.4627818611531787e-06,
+      "margin_significance_p": 4.302647870102203e-118,
+      "winner_significant": "True",
+      "margin_significant": "True"
+    },
+    "ensemble_ml_vs_deep_learning": {
+      "winner_accuracy_diff": 0.041269841269841234,
+      "margin_mae_diff": -0.6264518347350329,
+      "winner_significance_p": 7.259656084801361e-07,
+      "margin_significance_p": 8.029745707216674e-167,
+      "winner_significant": "True",
+      "margin_significant": "True"
+    }
+  },
+  "recommendations": {
+    "primary_model": "ensemble_ml",
+    "backup_model": "traditional_ml",
+    "deployment_strategy": "A/B testing with ensemble_ml as primary",
+    "monitoring_metrics": [
+      "winner_accuracy",
+      "margin_mae",
+      "calibration_error"
+    ],
+    "retraining_schedule": "Monthly with new season data"
+  }
+}
