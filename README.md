@@ -14,11 +14,13 @@ A comprehensive AFL (Australian Football League) match prediction system with an
 | Metric | Value |
 |--------|-------|
 | **Total Matches** | 16,649 |
-| **Total Player Records** | 670,839 |
+| **Total Player Records** | 677,647+ |
 | **Year Range** | 1897-2025 (129 years) |
 | **Unique Teams** | 25 (matches), 24 (players) |
 | **Unique Venues** | 50 |
-| **Database Size** | ~43.5 MB |
+| **Database Size** | ~45 MB |
+| **2025 Data Coverage** | Complete (Rounds 1-23) |
+| **2025 Player Records** | 7,688 individual player performances |
 
 ## 🎯 Features
 
@@ -44,7 +46,10 @@ AFL2/
 │   ├── data_pipeline.py        # Data loading and validation
 │   ├── feature_engineering_pipeline.py  # Feature creation and engineering
 │   ├── ml_training_pipeline.py # Model training and evaluation
-│   └── retrain_clean_model.py  # Clean model training (no data leakage)
+│   ├── retrain_clean_model.py  # Clean model training (no data leakage)
+│   ├── hybrid_data_pipeline.py # Evergreen data pipeline with web scraping
+│   ├── modern_afl_parser.py    # AFL Tables parser for 2025+ seasons
+│   └── simple_player_scraper.py # Individual player statistics scraper
 ├── docs/                       # Documentation and reports
 │   ├── reports/               # Analysis reports (EDA, Feature Engineering)
 │   └── visualizations/        # Generated charts and plots
@@ -386,7 +391,7 @@ To keep data current:
 
 ### Enhanced Scraping Features 🆕
 
-Our enhanced data pipeline now includes three powerful approaches:
+Our enhanced data pipeline now includes four powerful approaches:
 
 #### 🤖 Hybrid Evergreen Pipeline (RECOMMENDED)
 - **Automatic Data Detection**: Intelligently detects repository data cutoff year
@@ -394,6 +399,13 @@ Our enhanced data pipeline now includes three powerful approaches:
 - **Evergreen Operation**: Automatically handles 2026, 2027, and beyond without manual updates
 - **Smart Strategy**: Determines optimal data update strategy based on current date and existing data
 - **Zero Configuration**: Works out of the box for any future AFL season
+
+#### 🏈 Player Statistics Scraper (NEW!)
+- **Individual Player Data**: Scrapes detailed match-by-match player performance statistics
+- **Complete Coverage**: All AFL Tables player stats (kicks, marks, handballs, disposals, goals, etc.)
+- **Mass Processing**: Efficiently handles 148+ matches with 6,800+ player records
+- **Database Integration**: Seamlessly stores player data in existing SQLite schema
+- **Real Player Names**: Extracts and stores actual player names for enhanced analysis
 
 #### 🕷️ Enhanced Scraping Pipeline  
 - **Direct AFL Tables Scraping**: Get data directly from the primary source
@@ -418,6 +430,9 @@ python scripts/hybrid_data_pipeline.py --force_scraping
 
 # Full historical scraping (for research/backup)
 python scripts/enhanced_data_pipeline.py --start_year 2023 --end_year 2025 --scrape_matches
+
+# Scrape detailed player statistics for missing rounds
+python scripts/simple_player_scraper.py
 
 # Test scraping feasibility and data quality
 python scripts/simple_scraping_test.py
