@@ -87,14 +87,23 @@ pip install -r requirements.txt
 
 **Option B: Rebuild Database from Source**
 ```bash
-# Run the data pipeline to fetch fresh data from the original source
+# Method 1: Original repository data only
 python scripts/data_pipeline.py
 
+# Method 2: Enhanced scraping pipeline (full historical scraping)
+python scripts/enhanced_data_pipeline.py --start_year 2020 --end_year 2025 --scrape_matches
+
+# Method 3: Hybrid evergreen pipeline (RECOMMENDED!)
+python scripts/hybrid_data_pipeline.py
+
+# Method 4: Validate scraping vs repository data
+python scripts/test_scraping_pipeline.py
+
 # This will:
-# 1. Clone the AFL-Data-Analysis repository
-# 2. Process and validate all CSV files
-# 3. Create afl_data/afl_database.db
-# 4. Generate backup parquet files
+# 1. Intelligently combine repository data with real-time scraping
+# 2. Automatically detect data cutoffs and switch to scraping for newer seasons
+# 3. Create afl_data/afl_database.db with both historical and current data
+# 4. Generate comprehensive quality reports
 ```
 
 ### 3. Train a Model (First Time)
@@ -369,10 +378,50 @@ This project builds upon the excellent data collection and organization work by:
 
 To keep data current:
 
-1. **Check Original Source**: Monitor [AFL-Data-Analysis](https://github.com/akareen/AFL-Data-Analysis) for updates
-2. **Rebuild Database**: Run `python scripts/data_pipeline.py` to fetch latest data
-3. **Retrain Models**: Use `python scripts/retrain_clean_model.py` with fresh data
-4. **Update Features**: Modify feature engineering if new data columns are available
+1. **Enhanced Scraping (NEW!)**: Use `python scripts/enhanced_data_pipeline.py --start_year 2024 --scrape_matches` to get latest data directly from AFL Tables
+2. **Repository Method**: Monitor [AFL-Data-Analysis](https://github.com/akareen/AFL-Data-Analysis) for updates, then run `python scripts/data_pipeline.py`
+3. **Validation**: Run `python scripts/test_scraping_pipeline.py` to compare data sources and ensure quality
+4. **Retrain Models**: Use `python scripts/retrain_clean_model.py` with fresh data
+5. **Update Features**: Modify feature engineering if new data columns are available
+
+### Enhanced Scraping Features 🆕
+
+Our enhanced data pipeline now includes three powerful approaches:
+
+#### 🤖 Hybrid Evergreen Pipeline (RECOMMENDED)
+- **Automatic Data Detection**: Intelligently detects repository data cutoff year
+- **Seamless Transition**: Uses repository for historical data, scraping for current seasons
+- **Evergreen Operation**: Automatically handles 2026, 2027, and beyond without manual updates
+- **Smart Strategy**: Determines optimal data update strategy based on current date and existing data
+- **Zero Configuration**: Works out of the box for any future AFL season
+
+#### 🕷️ Enhanced Scraping Pipeline  
+- **Direct AFL Tables Scraping**: Get data directly from the primary source
+- **Data Quality Validation**: Compare scraped data with repository data for accuracy
+- **Intelligent Fallback**: Automatically falls back to repository data if scraping fails
+- **Completeness Verification**: Ensures no matches are missed
+- **Rate Limiting**: Respectful scraping with appropriate delays
+- **Comprehensive Reporting**: Detailed quality and completeness reports
+
+#### 📊 Validation & Testing Tools
+- **Scraping Feasibility Testing**: Validates AFL Tables accessibility and data structure
+- **Data Comparison**: Compares scraped vs repository data for accuracy
+- **Quality Metrics**: Comprehensive data quality scoring and reporting
+
+**Usage Examples:**
+```bash
+# Evergreen hybrid approach (recommended for production)
+python scripts/hybrid_data_pipeline.py
+
+# Force scraping even if repository is current
+python scripts/hybrid_data_pipeline.py --force_scraping
+
+# Full historical scraping (for research/backup)
+python scripts/enhanced_data_pipeline.py --start_year 2023 --end_year 2025 --scrape_matches
+
+# Test scraping feasibility and data quality
+python scripts/simple_scraping_test.py
+```
 
 ---
 
