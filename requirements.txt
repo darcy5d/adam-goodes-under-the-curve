@@ -2,16 +2,20 @@ pandas>=1.5.0
 numpy>=1.21.0
 matplotlib>=3.5.0
 seaborn>=0.11.0
-sqlite3
 requests>=2.28.0
 tqdm>=4.64.0
-plotly>=6.1.0
+plotly>=5.0.0
 gitpython>=3.1.0
 pydantic>=2.0.0
 pyarrow>=12.0.0
 fastparquet>=2023.0.0
 python-dateutil>=2.8.0
-logging
-pathlib
-typing
-dataclasses 
+
+# App dependencies
+streamlit>=1.32.0
+# Pin pre-1.0 openai for ChatCompletion API used in afl_dashboard.py
+openai==0.28.1
+
+# ML dependencies
+scikit-learn>=1.2.0
+xgboost>=1.7.0

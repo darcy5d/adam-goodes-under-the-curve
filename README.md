@@ -1,255 +1,238 @@
-# AFL Prediction Model
+# 🏈 AFL Match Prediction System
 
-A comprehensive machine learning system for predicting Australian Football League (AFL) match outcomes, including winner prediction and margin estimation.
+A comprehensive AFL (Australian Football League) match prediction system with an interactive Streamlit dashboard. This system uses machine learning to predict match winners and margins based on historical AFL data.
 
-## 🏆 Project Status: COMPLETE
+## 🎯 Features
 
-**Final Model Performance:**
-- **Winner Prediction Accuracy**: 83.5% (Ensemble ML)
-- **Margin Prediction MAE**: 2.09 points (Ensemble ML)
-- **Data Leakage Issue**: Successfully identified and resolved
-
-## 📊 Key Results
-
-### Model Performance Summary
-| Model | Winner Accuracy | Margin MAE | Status |
-|-------|----------------|------------|---------|
-| **Ensemble ML** | **83.5%** | **2.09** | **RECOMMENDED** |
-| Traditional ML | 81.1% | 2.20 | Backup |
-| Deep Learning | 80.5% | 3.01 | Alternative |
-
-### Critical Issue Resolution
-**Data Leakage Problem**: Initial models showed suspiciously perfect performance (100% accuracy, 0.0000 MAE). Investigation revealed that features included `home_total_goals` and `away_total_goals`, which perfectly determine the margin target variable.
-
-**Solution**: Removed leakage features (`home_total_goals`, `away_total_goals`, `home_total_behinds`, `away_total_behinds`) from the feature set, reducing features from 114 to 110 and achieving realistic, credible performance.
-
-## 🏗️ Project Architecture
-
-### Phase 1: Data Foundation
-- **Phase 1A**: Robust data pipeline with SQLite + Parquet backup
-- **Phase 1B**: Comprehensive exploratory data analysis (EDA)
-
-### Phase 2: Feature Engineering & Statistical Modeling
-- **Phase 2A**: Advanced feature engineering (110 features)
-- **Phase 2B**: Statistical distribution modeling and uncertainty quantification
-
-### Phase 3: Machine Learning Development
-- **Phase 3A**: ML architecture analysis and model selection
-- **Phase 3B**: Model training, evaluation, and optimization
+- **Interactive Dashboard**: Streamlit-based web interface for data exploration and predictions
+- **Data Exploration**: AFL-specific insights including current season ladder, rivalries, venue analysis, momentum tracking, and clutch performance
+- **Match Predictions**: Real-time prediction of match winners and margins using trained ML models
+- **Model Training**: Built-in training interface with feature selection capabilities
+- **Clean Architecture**: Organized codebase with clear separation of concerns
 
 ## 📁 Project Structure
 
 ```
 AFL2/
-├── afl_data/                    # Raw AFL data
-├── outputs/                     # All project outputs
-│   ├── data/                   # Processed data and model outputs
-│   │   ├── feature_engineering/
-│   │   ├── ml_models/
-│   │   ├── pipeline/
-│   │   └── statistical_modeling/
-│   ├── reports/                # Detailed analysis reports
-│   │   ├── eda/
-│   │   ├── feature_engineering/
-│   │   ├── ml_models/
-│   │   └── statistical_modeling/
-│   └── visualizations/         # Charts and graphs
-│       ├── eda/
-│       ├── feature_engineering/
-│       ├── ml_architecture/
-│       └── statistical_modeling/
-├── data_pipeline.py            # Phase 1A: Data loading and validation
-├── eda_comprehensive.py        # Phase 1B: Exploratory data analysis
-├── feature_engineering_pipeline.py  # Phase 2A: Feature engineering
-├── statistical_modeling_framework.py # Phase 2B: Statistical modeling
-├── ml_training_pipeline.py     # Phase 3A: Model training
-├── ml_evaluation_framework.py  # Phase 3B: Model evaluation
-├── navigate_outputs.py         # Output exploration utility
-└── requirements.txt            # Python dependencies
+├── README.md                    # This file
+├── requirements.txt             # Python dependencies
+├── afl_dashboard.py            # Main Streamlit dashboard application
+├── cleanup_repo.py             # Repository maintenance script
+├── afl2_env/                   # Python virtual environment
+├── afl_data/                   # Data storage
+│   ├── afl_database.db         # Main SQLite database with AFL match data
+│   └── AFL-Data-Analysis/      # Raw data files
+├── scripts/                    # Core processing scripts
+│   ├── data_pipeline.py        # Data loading and validation
+│   ├── feature_engineering_pipeline.py  # Feature creation and engineering
+│   ├── ml_training_pipeline.py # Model training and evaluation
+│   └── retrain_clean_model.py  # Clean model training (no data leakage)
+├── docs/                       # Documentation and reports
+│   ├── reports/               # Analysis reports (EDA, Feature Engineering)
+│   └── visualizations/        # Generated charts and plots
+└── outputs/                   # Model outputs and results
+    └── data/
+        ├── feature_engineering/  # Feature engineering results
+        └── ml_models/            # Trained models and evaluation data
 ```
 
 ## 🚀 Quick Start
 
 ### 1. Environment Setup
+
 ```bash
-# Create virtual environment
-python -m venv afl2_env
-source afl2_env/bin/activate  # On Windows: afl2_env\Scripts\activate
+# Clone and navigate to the repository
+cd AFL2
+
+# Activate the virtual environment
+source afl2_env/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Data Pipeline (Phase 1A)
+### 2. Train a Model (First Time)
+
 ```bash
-python data_pipeline.py
-```
-- Loads 16,649 match records and 670,839 player records
-- Validates data quality and integrity
-- Stores in SQLite with Parquet backup
-
-### 3. Exploratory Data Analysis (Phase 1B)
-```bash
-python eda_comprehensive.py
-```
-- Generates comprehensive visualizations
-- Creates detailed EDA report
-- Analyzes temporal trends and data quality
-
-### 4. Feature Engineering (Phase 2A)
-```bash
-python feature_engineering_pipeline.py
-```
-- Creates 110 engineered features
-- Implements team performance metrics
-- Generates feature importance analysis
-
-### 5. Statistical Modeling (Phase 2B)
-```bash
-python statistical_modeling_framework.py
-```
-- Fits statistical distributions
-- Implements hierarchical modeling
-- Quantifies uncertainty
-
-### 6. Model Training (Phase 3A)
-```bash
-python ml_training_pipeline.py
-```
-- Trains 3 ML models (Traditional, Ensemble, Deep Learning)
-- Implements proper train/validation/test splits
-- Addresses data leakage issues
-
-### 7. Model Evaluation (Phase 3B)
-```bash
-python ml_evaluation_framework.py
-```
-- Comprehensive model comparison
-- Statistical significance testing
-- Generates evaluation report
-
-### 8. Explore Outputs
-```bash
-python navigate_outputs.py
-```
-- Interactive exploration of all project outputs
-- Easy access to reports, visualizations, and data
-
-## 📈 Key Findings
-
-### Data Quality
-- **16,649 matches** (1965-2025)
-- **670,839 player records**
-- **High data quality** with minimal missing values
-- **Strong temporal consistency**
-
-### Feature Engineering
-- **110 engineered features** (after removing leakage)
-- **Team performance metrics**: Rolling averages, home/away splits
-- **Player aggregation**: Team composition, experience levels
-- **Contextual features**: Venue, rest days, season effects
-
-### Model Performance
-- **Ensemble ML** achieves best overall performance
-- **83.5% winner accuracy** with **2.09 point margin error**
-- **Robust generalization** across temporal splits
-- **No statistical overfitting** detected
-
-## 🔍 Output Navigation
-
-Use the navigation script to explore project outputs:
-```bash
-python navigate_outputs.py
+# Train a clean model with no data leakage
+python scripts/retrain_clean_model.py
 ```
 
-**Available Reports:**
-- `outputs/reports/eda/EDA_Report.md` - Comprehensive data analysis
-- `outputs/reports/feature_engineering/Feature_Engineering_Report.md` - Feature engineering strategy
-- `outputs/reports/statistical_modeling/Statistical_Modeling_Report.md` - Statistical modeling results
-- `outputs/reports/ml_models/ML_Evaluation_Report.md` - Model evaluation and selection
+### 3. Launch the Dashboard
 
-**Key Visualizations:**
-- Data quality and temporal analysis
-- Feature importance and correlation matrices
-- Model performance comparisons
-- Statistical distribution fitting
+```bash
+# Start the Streamlit dashboard
+streamlit run afl_dashboard.py
+```
 
-## 🎯 Model Deployment
+The dashboard will be available at `http://localhost:8501`
 
-### Recommended Model: Ensemble ML
-- **Architecture**: Stacking ensemble (Random Forest + XGBoost + Logistic Regression)
-- **Performance**: 83.5% winner accuracy, 2.09 point margin MAE
-- **Strengths**: Best overall performance, robust generalization
-- **Use Case**: Primary prediction model
+## 🎮 Dashboard Features
 
-### Backup Model: Traditional ML
-- **Architecture**: Random Forest
-- **Performance**: 81.1% winner accuracy, 2.20 point margin MAE
-- **Strengths**: High interpretability, consistent performance
-- **Use Case**: When interpretability is required
+### 🏠 Dashboard Overview
+- Latest 10 matches from the dataset
+- Model performance metrics and recent predictions
+- Quick statistics and data quality insights
 
-### Monitoring Strategy
-- **Temporal Performance**: Track accuracy across seasons
-- **Feature Drift**: Monitor feature distribution changes
-- **Model Retraining**: Quarterly updates with new data
-- **A/B Testing**: Gradual deployment with existing methods
+### 🔥 Data Explorer
+The data exploration section provides AFL-specific insights:
 
-## 🛠️ Technical Details
+- **🔥 Current Season**: Latest season ladder with wins, losses, and percentage
+- **⚔️ Rivalries**: Pre-configured AFL rivalries with head-to-head records
+- **📍 Venues**: Venue statistics, home advantages, and team performance by ground
+- **💫 Momentum**: Team form tracking with customizable windows
+- **🎯 Clutch Performance**: Analysis of team performance in close games
+
+### 🎯 Match Predictions
+Real-time match prediction interface:
+
+- **Team Selection**: Choose home and away teams
+- **Match Details**: Set venue, date, and other parameters
+- **Auto-calculated Features**: 
+  - Rest days (automatically calculated from team schedules)
+  - Season round estimation from match date
+  - Dynamic attendance prediction based on teams, venue, and round
+- **Prediction Results**: 
+  - Winner probability with confidence metrics
+  - Predicted margin with realistic scaling
+  - Feature importance breakdown
+  - Draw probability for very close matches
+
+### 🏋️ Model Training
+Built-in model training interface:
+
+- **Feature Selection**: Toggle between full feature set and pruned features
+- **Training Progress**: Real-time training status and metrics
+- **Model Comparison**: Performance comparison between different approaches
+
+## 🧠 Machine Learning Architecture
 
 ### Data Pipeline
-- **Storage**: SQLite database with Parquet backup
-- **Validation**: Comprehensive data quality checks
-- **Incremental Updates**: Batch loading with validation
-- **Logging**: Detailed pipeline execution logs
+- **Data Loading**: SQLite database with comprehensive AFL match data
+- **Data Validation**: Automatic data type conversion and quality checks
+- **Feature Storage**: Efficient parquet format for processed features
 
 ### Feature Engineering
-- **Team Performance**: Rolling averages, exponential weighted means
-- **Player Metrics**: Aggregated statistics, experience levels
-- **Contextual Features**: Venue effects, rest days, season trends
-- **Advanced Features**: Interaction terms, momentum indicators
+The system creates 28 clean features (no data leakage):
+
+**Team Performance Features:**
+- Rolling averages for goals for/against (5, 10, season)
+- Win rates and recent form
+- Momentum indicators (trend analysis)
+
+**Head-to-Head Features:**
+- Historical matchup records
+- Recent performance between teams
+
+**Contextual Features:**
+- Venue experience and home advantage
+- Rest days between matches
+- Season progression indicators
+
+**Advanced Features:**
+- Feature interactions and squared terms
+- Normalized venue statistics
+- Dynamic attendance modeling
 
 ### Model Architecture
-- **Traditional ML**: Random Forest with hyperparameter optimization
-- **Ensemble ML**: Stacking with cross-validation
-- **Deep Learning**: Multi-layer perceptron with regularization
+- **Winner Prediction**: RandomForestClassifier for match outcome
+- **Margin Prediction**: RandomForestRegressor with confidence-based scaling
+- **Feature Selection**: 28 carefully selected features avoiding data leakage
+- **Confidence Scaling**: Post-prediction margin adjustment based on winner confidence
 
-### Evaluation Framework
-- **Traditional Metrics**: Accuracy, MAE, R², F1-score
-- **Probabilistic Evaluation**: Brier score, log-likelihood
-- **Domain-Specific Metrics**: Close game performance
-- **Robustness Testing**: Temporal stability analysis
+## 📊 Model Performance
 
-## 📚 Methodology
+The clean model (without data leakage) typically achieves:
+- **Winner Accuracy**: ~65-70% (realistic for AFL)
+- **Margin MAE**: ~20-25 points (industry competitive)
+- **Feature Importance**: Balanced across team form, venue, and context
 
-### Data Science Approach
-1. **Exploratory Analysis**: Comprehensive data understanding
-2. **Feature Engineering**: Domain-driven feature creation
-3. **Statistical Modeling**: Distribution fitting and uncertainty quantification
-4. **Machine Learning**: Multiple model architectures with rigorous evaluation
-5. **Validation**: Cross-validation and temporal testing
+## 🔧 Technical Details
 
-### Quality Assurance
-- **Data Leakage Prevention**: Careful feature selection and validation
-- **Overfitting Detection**: Cross-validation and temporal splits
-- **Statistical Significance**: Rigorous model comparison testing
-- **Reproducibility**: Version-controlled code and documented processes
+### Dependencies
+- **Streamlit**: Interactive web dashboard
+- **Pandas/NumPy**: Data manipulation and analysis
+- **Scikit-learn**: Machine learning models
+- **Plotly**: Interactive visualizations
+- **SQLite**: Database storage
 
-## 🤝 Contributing
+### Data Sources
+- Historical AFL match data including scores, venues, dates
+- Team performance statistics
+- Venue information and crowd data
 
-This project demonstrates a complete data science workflow for sports prediction. Key learnings:
+### Feature Engineering Philosophy
+- **No Data Leakage**: Features only use information available before match start
+- **AFL-Specific**: Features designed for Australian Rules Football dynamics
+- **Robust**: Handles missing data and edge cases gracefully
 
-1. **Data Leakage Detection**: Critical for realistic model evaluation
-2. **Feature Engineering**: Domain knowledge essential for predictive features
-3. **Model Diversity**: Multiple approaches provide robustness
-4. **Rigorous Evaluation**: Comprehensive testing prevents overfitting
+## 🛠️ Development & Maintenance
 
-## 📄 License
+### Adding New Features
+1. Modify `scripts/feature_engineering_pipeline.py`
+2. Update feature blacklist in training pipeline if needed
+3. Retrain model with `python scripts/retrain_clean_model.py`
 
-This project is for educational and research purposes. AFL data sourced from public repositories.
+### Model Retraining
+```bash
+# Clean model training (recommended)
+python scripts/retrain_clean_model.py
+
+# Or use the dashboard training interface
+# Navigate to "Train Models" in the sidebar
+```
+
+### Data Updates
+```bash
+# Update database with new match data
+python scripts/data_pipeline.py
+
+# Regenerate features
+python scripts/feature_engineering_pipeline.py
+```
+
+### Repository Cleanup
+```bash
+# Clean up temporary files and reorganize
+python cleanup_repo.py
+```
+
+## 🎯 Usage Tips
+
+### For Best Predictions:
+- Ensure model is trained on recent data
+- Use realistic team names (check dropdown options)
+- Verify venue names match database entries
+- Consider rest days and season context
+
+### Dashboard Navigation:
+- Start with "Data Explorer" to understand the data
+- Use "Match Predictions" for forecasting
+- Check "Dashboard Overview" for model health
+- Use "Train Models" to retrain with new data
+
+### Troubleshooting:
+- If predictions fail, check team/venue name spelling
+- If dashboard won't load, ensure virtual environment is activated
+- If model not found, run `python scripts/retrain_clean_model.py`
+
+## 📈 Future Enhancements
+
+- Real-time data integration from AFL APIs
+- Player-level statistics and injury data
+- Weather and ground condition factors
+- Advanced ensemble methods
+- Mobile-responsive dashboard design
+
+## 📝 License & Credits
+
+This project is designed for AFL match prediction research and education. AFL data used under fair use for analytical purposes.
 
 ---
 
-**Project Completion**: December 2024  
-**Total Development Time**: Comprehensive multi-phase approach  
-**Final Model**: Ensemble ML with 83.5% accuracy  
-**Status**: Ready for deployment and monitoring 
+**🏈 Ready to predict some AFL matches? Fire up the dashboard and explore!**
+
+```bash
+source afl2_env/bin/activate
+streamlit run afl_dashboard.py
+```

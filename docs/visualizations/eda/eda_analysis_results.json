@@ -1,0 +1,179 @@
+{
+  "timestamp": "2025-06-24T12:19:54.546850",
+  "data_overview": {
+    "matches": {
+      "total_matches": 16649,
+      "year_range": [
+        "1897",
+        "2025"
+      ],
+      "unique_teams": 25,
+      "unique_venues": 50
+    },
+    "players": {
+      "total_players": 670839,
+      "year_range": [
+        "1897",
+        "2025"
+      ],
+      "unique_teams": 24,
+      "unique_players": 0
+    },
+    "scoring": {
+      "home_goals_mean": 12.680283551603988,
+      "away_goals_mean": 11.546497657094797,
+      "home_goals_std": 4.9360857538172835,
+      "away_goals_std": 4.6931912923578105,
+      "total_goals_mean": 24.226781208698785
+    }
+  },
+  "temporal_analysis": {
+    "match_data_growth": {
+      "early_era_avg": NaN,
+      "mid_era_avg": NaN,
+      "modern_era_avg": NaN
+    },
+    "player_data_growth": {
+      "early_era_avg": NaN,
+      "mid_era_avg": NaN,
+      "modern_era_avg": NaN
+    },
+    "round_scoring_patterns": {
+      "highest_scoring_round": "22",
+      "lowest_scoring_round": "Grand Final",
+      "avg_goals_per_round": 24.661645228908768
+    },
+    "early_era": {
+      "avg_home_goals": 10.557094120008028,
+      "avg_away_goals": 9.441099739112984,
+      "home_advantage": 1.115994380895044,
+      "total_matches": 4983
+    },
+    "mid_era": {
+      "avg_home_goals": 13.322900466562986,
+      "avg_away_goals": 12.225894245723172,
+      "home_advantage": 1.0970062208398144,
+      "total_matches": 5144
+    },
+    "modern_era": {
+      "avg_home_goals": 13.796134376438104,
+      "avg_away_goals": 12.6197269519865,
+      "home_advantage": 1.1764074244516038,
+      "total_matches": 6522
+    }
+  },
+  "match_analysis": {},
+  "player_analysis": {},
+  "data_quality": {
+    "missing_data": {
+      "match_data": {
+        "columns_with_missing": 19,
+        "avg_missing_pct": 3.8908199212904817,
+        "worst_columns": {
+          "attendance": 89.16451438524837,
+          "home_team": 0.018019100246261036,
+          "team_1_q1_goals": 0.018019100246261036
+        }
+      },
+      "player_data": {
+        "columns_with_missing": 26,
+        "avg_missing_pct": 54.06493957566568,
+        "worst_columns": {
+          "brownlow_votes": 96.59158158664002,
+          "bounces": 91.84170866631189,
+          "goal_assist": 91.55117695900209,
+          "marks_inside_50": 89.24570575056012,
+          "hit_outs": 88.80103869930042
+        }
+      }
+    },
+    "outliers": {
+      "kicks": {
+        "outlier_count": 4415,
+        "outlier_pct": 1.0464465850051197,
+        "min_value": 1.0,
+        "max_value": 44.0,
+        "lower_bound": -4.5,
+        "upper_bound": 23.5
+      },
+      "marks": {
+        "outlier_count": 12331,
+        "outlier_pct": 3.123717555743577,
+        "min_value": 1.0,
+        "max_value": 24.0,
+        "lower_bound": -2.5,
+        "upper_bound": 9.5
+      },
+      "handballs": {
+        "outlier_count": 9445,
+        "outlier_pct": 2.3513976438721755,
+        "min_value": 1.0,
+        "max_value": 35.0,
+        "lower_bound": -4.5,
+        "upper_bound": 15.5
+      },
+      "disposals": {
+        "outlier_count": 2364,
+        "outlier_pct": 0.5572698492024016,
+        "min_value": 1.0,
+        "max_value": 54.0,
+        "lower_bound": -5.0,
+        "upper_bound": 35.0
+      },
+      "goals": {
+        "outlier_count": 20268,
+        "outlier_pct": 9.08023834057614,
+        "min_value": 1.0,
+        "max_value": 18.0,
+        "lower_bound": -0.5,
+        "upper_bound": 3.5
+      },
+      "tackles": {
+        "outlier_count": 3864,
+        "outlier_pct": 1.5618179172527527,
+        "min_value": 1.0,
+        "max_value": 20.0,
+        "lower_bound": -3.5,
+        "upper_bound": 8.5
+      }
+    },
+    "consistency": {
+      "year_overlap": {
+        "match_years": 129,
+        "player_years": 129,
+        "overlap_years": 129,
+        "overlap_pct": 100.0
+      },
+      "team_consistency": {
+        "match_teams": 25,
+        "player_teams": 24,
+        "overlap_teams": 24,
+        "overlap_pct": 96.0
+      }
+    }
+  },
+  "recommendations": {
+    "reliable_eras": [
+      "Mid Era (1951-1990) - Most balanced data",
+      "Modern Era (1991-2025) - Good for recent trends"
+    ],
+    "predictive_statistics": [
+      "kicks",
+      "marks",
+      "handballs",
+      "disposals"
+    ],
+    "preprocessing_strategies": [
+      "Handle missing values with era-specific imputation",
+      "Remove statistical outliers using IQR method",
+      "Normalize statistics by era to account for rule changes",
+      "Create derived features (efficiency ratios, etc.)"
+    ],
+    "model_training_timeline": [
+      "Use 1991-2020 for training (30 years of modern data)",
+      "Use 2021-2023 for validation",
+      "Use 2024-2025 for testing",
+      "Consider separate models for different eras"
+    ]
+  }
+}
