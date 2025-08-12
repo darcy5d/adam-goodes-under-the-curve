@@ -2,6 +2,24 @@
 
 A comprehensive AFL (Australian Football League) match prediction system with an interactive Streamlit dashboard. This system uses machine learning to predict match winners and margins based on historical AFL data.
 
+## 📊 Data Sources
+
+- **Primary Source**: [AFL-Data-Analysis Repository](https://github.com/akareen/AFL-Data-Analysis)
+- **Data Coverage**: 1897-2025 (historical to current)
+- **Data Types**: Match results, player statistics, team performance
+- **Attribution**: This project builds upon the excellent work by akareen in collecting and organizing AFL historical data
+
+### Current Dataset Statistics
+
+| Metric | Value |
+|--------|-------|
+| **Total Matches** | 16,649 |
+| **Total Player Records** | 670,839 |
+| **Year Range** | 1897-2025 (129 years) |
+| **Unique Teams** | 25 (matches), 24 (players) |
+| **Unique Venues** | 50 |
+| **Database Size** | ~43.5 MB |
+
 ## 🎯 Features
 
 - **Interactive Dashboard**: Streamlit-based web interface for data exploration and predictions
@@ -38,27 +56,55 @@ AFL2/
 
 ## 🚀 Quick Start
 
-### 1. Environment Setup
+### Prerequisites
+
+- Python 3.8+
+- Git
+- 2GB+ free disk space
+
+### 1. Repository Setup
 
 ```bash
-# Clone and navigate to the repository
-cd AFL2
+# Clone this repository
+git clone https://github.com/darcy5d/adam-goodes-under-the-curve.git
+cd adam-goodes-under-the-curve
 
-# Activate the virtual environment
-source afl2_env/bin/activate
+# Create and activate virtual environment
+python -m venv afl2_env
+source afl2_env/bin/activate  # On Windows: afl2_env\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Train a Model (First Time)
+### 2. Data Setup
+
+**Option A: Use Existing Database (Recommended)**
+```bash
+# The repository includes a pre-built database (afl_data/afl_database.db)
+# Skip to step 3 if this file exists and is recent
+```
+
+**Option B: Rebuild Database from Source**
+```bash
+# Run the data pipeline to fetch fresh data from the original source
+python scripts/data_pipeline.py
+
+# This will:
+# 1. Clone the AFL-Data-Analysis repository
+# 2. Process and validate all CSV files
+# 3. Create afl_data/afl_database.db
+# 4. Generate backup parquet files
+```
+
+### 3. Train a Model (First Time)
 
 ```bash
 # Train a clean model with no data leakage
 python scripts/retrain_clean_model.py
 ```
 
-### 3. Launch the Dashboard
+### 4. Launch the Dashboard
 
 ```bash
 # Start the Streamlit dashboard
@@ -104,6 +150,76 @@ Built-in model training interface:
 - **Feature Selection**: Toggle between full feature set and pruned features
 - **Training Progress**: Real-time training status and metrics
 - **Model Comparison**: Performance comparison between different approaches
+
+## 📋 Data Schema
+
+### Match Data Structure
+```sql
+matches (
+    id INTEGER PRIMARY KEY,
+    year INTEGER NOT NULL,
+    ground TEXT,
+    venue TEXT,
+    date TEXT NOT NULL,
+    home_team TEXT NOT NULL,
+    away_team TEXT NOT NULL,
+    home_team_goals_by_quarter TEXT,
+    home_team_behinds_by_quarter TEXT,
+    away_team_goals_by_quarter TEXT,
+    away_team_behinds_by_quarter TEXT,
+    home_total_goals INTEGER,
+    home_total_behinds INTEGER,
+    away_total_goals INTEGER,
+    away_total_behinds INTEGER,
+    winning_team TEXT,
+    margin INTEGER,
+    created_at TIMESTAMP
+)
+```
+
+### Player Data Structure
+```sql
+players (
+    id INTEGER PRIMARY KEY,
+    team TEXT,
+    year INTEGER,
+    games_played INTEGER,
+    opponent TEXT,
+    round TEXT,
+    result TEXT,
+    jersey_number INTEGER,
+    kicks INTEGER,
+    marks INTEGER,
+    handballs INTEGER,
+    disposals INTEGER,
+    goals INTEGER,
+    behinds INTEGER,
+    hit_outs INTEGER,
+    tackles INTEGER,
+    rebound_50s INTEGER,
+    inside_50s INTEGER,
+    clearances INTEGER,
+    clangers INTEGER,
+    free_kicks_for INTEGER,
+    free_kicks_against INTEGER,
+    brownlow_votes INTEGER,
+    contested_possessions INTEGER,
+    uncontested_possessions INTEGER,
+    contested_marks INTEGER,
+    marks_inside_50 INTEGER,
+    one_percenters INTEGER,
+    bounces INTEGER,
+    goal_assist INTEGER,
+    percentage_of_game_played REAL,
+    first_name TEXT,
+    last_name TEXT,
+    born_date TEXT,
+    debut_date TEXT,
+    height INTEGER,
+    weight INTEGER,
+    created_at TIMESTAMP
+)
+```
 
 ## 🧠 Machine Learning Architecture
 
@@ -224,9 +340,39 @@ python cleanup_repo.py
 - Advanced ensemble methods
 - Mobile-responsive dashboard design
 
-## 📝 License & Credits
+## 🙏 Credits & Attribution
 
-This project is designed for AFL match prediction research and education. AFL data used under fair use for analytical purposes.
+### Data Sources
+- **Primary Data**: [AFL-Data-Analysis Repository](https://github.com/akareen/AFL-Data-Analysis) by akareen
+- **Original AFL Data**: Australian Football League historical match and player statistics
+- **Data Period**: 1897-2025 (129 years of AFL history)
+
+### Data Processing
+This project builds upon the excellent data collection and organization work by:
+- **akareen**: Original AFL data collection, cleaning, and CSV organization
+- **AFL**: Official match records and statistics
+
+### Our Contributions
+- Machine learning prediction models with clean feature engineering
+- Interactive Streamlit dashboard for data exploration and predictions
+- Comprehensive data pipeline with validation and quality checks
+- Repository organization and production-ready structure
+
+## 📝 License & Usage
+
+- **Research & Education**: This project is designed for AFL match prediction research and educational purposes
+- **Data Attribution**: AFL data used under fair use for analytical purposes, original collection by akareen
+- **Non-Commercial**: Please respect the original data sources and use responsibly
+- **Code License**: Open source - feel free to learn from and improve upon this work
+
+### Data Update Process
+
+To keep data current:
+
+1. **Check Original Source**: Monitor [AFL-Data-Analysis](https://github.com/akareen/AFL-Data-Analysis) for updates
+2. **Rebuild Database**: Run `python scripts/data_pipeline.py` to fetch latest data
+3. **Retrain Models**: Use `python scripts/retrain_clean_model.py` with fresh data
+4. **Update Features**: Modify feature engineering if new data columns are available
 
 ---
 
@@ -236,3 +382,9 @@ This project is designed for AFL match prediction research and education. AFL da
 source afl2_env/bin/activate
 streamlit run afl_dashboard.py
 ```
+
+## 🔗 Links
+
+- **This Repository**: [AFL Match Prediction System](https://github.com/darcy5d/adam-goodes-under-the-curve)
+- **Original Data Source**: [AFL-Data-Analysis](https://github.com/akareen/AFL-Data-Analysis)
+- **AFL Official**: [www.afl.com.au](https://www.afl.com.au)
