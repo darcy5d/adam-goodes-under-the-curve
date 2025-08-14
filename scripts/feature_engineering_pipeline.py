@@ -72,10 +72,12 @@ class FeatureEngineeringPipeline:
         team_stats = []
         
         for _, match in self.matches_df.iterrows():
-            # Calculate margin based on goals
+            # Calculate margin based on points
             home_goals = match['home_total_goals']
             away_goals = match['away_total_goals']
-            margin = home_goals - away_goals
+            home_behinds = match['home_total_behinds']
+            away_behinds = match['away_total_behinds']
+            margin = (home_goals * 6 + home_behinds) - (away_goals * 6 + away_behinds)
             winning_team = match['home_team'] if margin > 0 else match['away_team'] if margin < 0 else 'Draw'
             
             # Home team stats
@@ -474,7 +476,7 @@ class FeatureEngineeringPipeline:
         
         # Add margin column if it doesn't exist
         if 'margin' not in features_df.columns:
-            features_df['margin'] = features_df['home_total_goals'] - features_df['away_total_goals']
+            features_df['margin'] = (features_df['home_total_goals'] * 6 + features_df['home_total_behinds']) - (features_df['away_total_goals'] * 6 + features_df['away_total_behinds'])
         
         # Prepare data for analysis
         X = features_df.select_dtypes(include=[np.number]).dropna()

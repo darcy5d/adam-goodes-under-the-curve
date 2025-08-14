@@ -104,7 +104,7 @@ class AFLDashboard:
         page = st.sidebar.selectbox(
             "Navigation",
             ["🏠 Dashboard Overview", "📊 Data Exploration", "🎯 Match Predictions", 
-             "📈 Model Performance", "🔍 Feature Analysis", "🛠️ Train Models", "🤖 AI Analytics", "📚 Help & Documentation"]
+             "📈 Model Performance", "🔍 Feature Analysis", "🛠️ Train Models", "🔄 Data Management", "🤖 AI Analytics", "📚 Help & Documentation"]
         )
         
         # Page routing
@@ -120,6 +120,8 @@ class AFLDashboard:
             self.feature_analysis()
         elif page == "🛠️ Train Models":
             self.train_models()
+        elif page == "🔄 Data Management":
+            self.data_management()
         elif page == "🤖 AI Analytics":
             self.ai_analytics()
         elif page == "📚 Help & Documentation":
@@ -676,32 +678,74 @@ class AFLDashboard:
     def _calculate_rest_days(self, team, match_date):
         """Calculate rest days for a team based on their last match before the prediction date."""
         try:
+            # Debug: Store original inputs for debugging
+            debug_info = {
+                'team': team,
+                'match_date': match_date,
+                'input_type': type(match_date)
+            }
+            
+            # Use CURRENT database data instead of cached CSV
+            import sqlite3
+            conn = sqlite3.connect('afl_data/afl_database.db')
+            current_matches = pd.read_sql_query('SELECT * FROM matches WHERE year = 2025', conn)
+            conn.close()
+            
             # Get team's recent matches before the prediction date
-            team_matches = self.features_df[
-                ((self.features_df['home_team'] == team) | (self.features_df['away_team'] == team)) &
-                (pd.to_datetime(self.features_df['date']) < pd.to_datetime(match_date))
-            ].sort_values('date')
+            team_matches = current_matches[
+                ((current_matches['home_team'] == team) | (current_matches['away_team'] == team)) &
+                (pd.to_datetime(current_matches['date'], format='mixed', errors='coerce') < pd.to_datetime(match_date))
+            ].copy()
+            
+            debug_info['total_team_matches'] = len(team_matches)
             
             if len(team_matches) == 0:
+                debug_info['result'] = 'No matches found'
+                # Store debug info in session state for display
+                if 'rest_days_debug' not in st.session_state:
+                    st.session_state.rest_days_debug = {}
+                st.session_state.rest_days_debug[team] = debug_info
                 return 7  # Default 7 days if no history
             
-            last_match_date = pd.to_datetime(team_matches.iloc[-1]['date'])
+            # Convert date column to datetime for proper sorting
+            team_matches['date_parsed'] = pd.to_datetime(team_matches['date'], format='mixed', errors='coerce')
+            team_matches = team_matches.sort_values('date_parsed')
+            
+            last_match_date = team_matches.iloc[-1]['date_parsed']
             prediction_date = pd.to_datetime(match_date)
             rest_days = (prediction_date - last_match_date).days
+            
+            # Store debug info
+            debug_info['last_match_date'] = str(last_match_date)
+            debug_info['prediction_date'] = str(prediction_date)
+            debug_info['raw_rest_days'] = rest_days
+            debug_info['capped_rest_days'] = max(0, min(rest_days, 60))
+            
+            # Store debug info in session state for display
+            if 'rest_days_debug' not in st.session_state:
+                st.session_state.rest_days_debug = {}
+            st.session_state.rest_days_debug[team] = debug_info
             
             # Cap between reasonable bounds (0-60 days)
             return max(0, min(rest_days, 60))
             
-        except Exception:
+        except Exception as e:
+            # Add debug info
+            debug_info['error'] = str(e)
+            if 'rest_days_debug' not in st.session_state:
+                st.session_state.rest_days_debug = {}
+            st.session_state.rest_days_debug[team] = debug_info
+            print(f"Error calculating rest days for {team}: {e}")
             return 7  # Default fallback
     
-    @st.cache_data
+    @st.cache_data(hash_funcs={"builtins.method": lambda _: None})
     def _build_attendance_model(_self):
         """Build a simple regression model for attendance prediction using historical data."""
         try:
             df = _self.features_df.copy()
             
-            # Filter for matches with attendance data
+            # Ensure attendance is numeric and filter for matches with attendance data
+            df['attendance'] = pd.to_numeric(df['attendance'], errors='coerce')
             df = df[pd.notna(df['attendance']) & (df['attendance'] > 0)].copy()
             
             if len(df) == 0:
@@ -854,6 +898,103 @@ class AFLDashboard:
                 
         except Exception:
             return 10  # Default fallback
+    
+    def _calculate_rest_days_from_df(self, team, match_date, matches_df):
+        """Calculate rest days for a team using provided matches DataFrame."""
+        try:
+            # Get team's recent matches before the prediction date
+            team_matches = matches_df[
+                ((matches_df['home_team'] == team) | (matches_df['away_team'] == team)) &
+                (pd.to_datetime(matches_df['date'], format='mixed', errors='coerce') < pd.to_datetime(match_date))
+            ].copy()
+            
+            if len(team_matches) == 0:
+                return 7  # Default 7 days if no history
+            
+            # Convert date column to datetime for proper sorting
+            team_matches['date_parsed'] = pd.to_datetime(team_matches['date'], format='mixed', errors='coerce')
+            team_matches = team_matches.sort_values('date_parsed')
+            
+            last_match_date = team_matches.iloc[-1]['date_parsed']
+            prediction_date = pd.to_datetime(match_date)
+            rest_days = (prediction_date - last_match_date).days
+            
+            # Cap between reasonable bounds (0-60 days)
+            return max(0, min(rest_days, 60))
+            
+        except Exception as e:
+            print(f"Error calculating rest days for {team}: {e}")
+            return 7  # Default fallback
+
+    def _calculate_betting_odds(self, prediction_result):
+        """Convert prediction probabilities to fair betting odds and provide recommendations."""
+        try:
+            home_prob = prediction_result['home_prob']
+            away_prob = prediction_result['away_prob']
+            draw_prob = prediction_result.get('draw_prob', 0.02)  # Default 2% for draws
+            
+            # Convert probabilities to decimal odds (1/probability)
+            home_fair_odds = 1 / home_prob if home_prob > 0 else 999
+            away_fair_odds = 1 / away_prob if away_prob > 0 else 999
+            draw_fair_odds = 1 / draw_prob if draw_prob > 0 else 999
+            
+            # Convert to traditional odds formats
+            def decimal_to_fractional(decimal_odds):
+                """Convert decimal odds to fractional odds string."""
+                if decimal_odds < 1.01:
+                    return "1/999"
+                
+                numerator = decimal_odds - 1
+                
+                # Find best fractional representation
+                for denom in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 20, 25, 50, 100]:
+                    num = round(numerator * denom)
+                    if abs(num/denom - numerator) < 0.01:  # Close enough
+                        return f"{num}/{denom}"
+                
+                # Fallback to 2 decimal places
+                return f"{numerator:.2f}/1"
+            
+            def decimal_to_american(decimal_odds):
+                """Convert decimal odds to American odds."""
+                if decimal_odds >= 2.0:
+                    return f"+{int((decimal_odds - 1) * 100)}"
+                else:
+                    return f"{int(-100 / (decimal_odds - 1))}"
+            
+            # Calculate edge for betting decisions
+            def calculate_edge(fair_odds, bookmaker_odds):
+                """Calculate the betting edge given fair odds vs bookmaker odds."""
+                if bookmaker_odds <= 0:
+                    return 0
+                
+                fair_prob = 1 / fair_odds
+                implied_prob = 1 / bookmaker_odds
+                edge = (fair_prob - implied_prob) / implied_prob
+                return edge
+            
+            betting_analysis = {
+                'home_fair_decimal': home_fair_odds,
+                'away_fair_decimal': away_fair_odds,
+                'draw_fair_decimal': draw_fair_odds,
+                'home_fair_fractional': decimal_to_fractional(home_fair_odds),
+                'away_fair_fractional': decimal_to_fractional(away_fair_odds),
+                'draw_fair_fractional': decimal_to_fractional(draw_fair_odds),
+                'home_fair_american': decimal_to_american(home_fair_odds),
+                'away_fair_american': decimal_to_american(away_fair_odds),
+                'draw_fair_american': decimal_to_american(draw_fair_odds),
+                'home_prob': home_prob,
+                'away_prob': away_prob,
+                'draw_prob': draw_prob,
+                'edge_calculator': calculate_edge,
+                'confidence': prediction_result.get('overall_confidence', 0.7)
+            }
+            
+            return betting_analysis
+            
+        except Exception as e:
+            st.error(f"Error calculating betting odds: {e}")
+            return None
 
     def match_predictions(self):
         """Match prediction interface."""
@@ -904,53 +1045,85 @@ class AFLDashboard:
         
             # Auto-calculate parameters when teams/venue/date are selected
             if home_team and away_team and venue and match_date:
-                # Create a unique key based on selections to force recalculation
-                selection_key = f"{home_team}_{away_team}_{venue}_{match_date}"
+                # Convert match_date to string for consistent processing
+                match_date_str = match_date.strftime('%Y-%m-%d') if hasattr(match_date, 'strftime') else str(match_date)
+                
+                # Force recalculation by clearing any cached state when inputs change
+                current_inputs = f"{home_team}_{away_team}_{venue}_{match_date_str}"
+                if 'last_inputs' not in st.session_state or st.session_state.last_inputs != current_inputs:
+                    st.session_state.last_inputs = current_inputs
+                    # Clear any cached calculations
+                    if hasattr(st.session_state, 'cached_rest_days'):
+                        del st.session_state.cached_rest_days
+                    
+                    # Show when inputs change
+                    st.success(f"🔄 Inputs updated! Recalculating for {match_date_str}...")
                 
                 # Calculate automated values (these will recalculate when inputs change)
-                home_rest_days_auto = self._calculate_rest_days(home_team, match_date)
-                away_rest_days_auto = self._calculate_rest_days(away_team, match_date)
-                estimated_attendance = self._estimate_attendance(home_team, away_team, venue, match_date)
-                estimated_round = self._estimate_season_round(match_date)
+                # Load database once for efficiency
+                import sqlite3
+                conn = sqlite3.connect('afl_data/afl_database.db')
+                current_matches = pd.read_sql_query('SELECT * FROM matches WHERE year = 2025', conn)
+                conn.close()
                 
-                # Show auto-calculated values
+                home_rest_days_auto = self._calculate_rest_days_from_df(home_team, match_date_str, current_matches)
+                away_rest_days_auto = self._calculate_rest_days_from_df(away_team, match_date_str, current_matches)
+                estimated_attendance = self._estimate_attendance(home_team, away_team, venue, match_date_str)
+                estimated_round = self._estimate_season_round(match_date_str)
+                
+                # Debug info (can be removed later)
+                if st.checkbox("🐛 Debug Mode", help="Show calculation details"):
+                    st.write(f"**Debug Info:**")
+                    st.write(f"- Match Date: {match_date_str}")
+                    st.write(f"- Home Rest Days: {home_rest_days_auto}")
+                    st.write(f"- Away Rest Days: {away_rest_days_auto}")
+                    st.write(f"- Estimated Round: {estimated_round}")
+                    st.write(f"- Estimated Attendance: {estimated_attendance}")
+                    
+                    # Show detailed rest days debugging
+                    if 'rest_days_debug' in st.session_state:
+                        st.write("**Rest Days Debug Info:**")
+                        for team, debug_info in st.session_state.rest_days_debug.items():
+                            st.write(f"**{team}:**")
+                            for key, value in debug_info.items():
+                                st.write(f"  - {key}: {value}")
+                
+                # Show auto-calculated values - Force refresh with unique container
                 st.subheader("🤖 Auto-Calculated Parameters")
                 
-                col1, col2, col3 = st.columns(3)
+                # Create a unique container that forces refresh
+                refresh_key = f"{home_team}_{away_team}_{venue}_{match_date_str}"
                 
-                with col1:
-                    st.metric(
-                        label="Home Team Rest Days",
-                        value=f"{home_rest_days_auto} days",
-                        help="Calculated from last match in dataset"
-                    )
-                    st.metric(
-                        label="Away Team Rest Days", 
-                        value=f"{away_rest_days_auto} days",
-                        help="Calculated from last match in dataset"
-                    )
-                
-                with col2:
-                    st.metric(
-                        label="Estimated Round",
-                        value=f"Round {estimated_round}",
-                        help="Estimated from match date"
-                    )
-                    st.metric(
-                        label="Match Year",
-                        value=f"{match_date.year}",
-                        help="From selected date"
-                    )
-                
-                with col3:
-                    # Force update by including selection hash in display
-                    selection_hash = hash(selection_key) % 10000
-                    st.metric(
-                        label="🎪 Dynamic Attendance",
-                        value=f"{estimated_attendance:,}",
-                        delta=f"#{selection_hash}",
-                        help="Updates automatically based on teams/venue selection"
-                    )
+                # Use a container that gets completely rewritten each time
+                params_container = st.container()
+                with params_container:
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.markdown("**🏠 Home Team Rest Days**")
+                        st.markdown(f"### {home_rest_days_auto} days")
+                        st.caption("Calculated from last match in dataset")
+                        
+                        st.markdown("**🛣️ Away Team Rest Days**")
+                        st.markdown(f"### {away_rest_days_auto} days") 
+                        st.caption("Calculated from last match in dataset")
+                    
+                    with col2:
+                        st.markdown("**🏆 Estimated Round**")
+                        st.markdown(f"### Round {estimated_round}")
+                        st.caption("Estimated from match date")
+                        
+                        st.markdown("**📅 Match Year**")
+                        st.markdown(f"### {match_date.year}")
+                        st.caption("From selected date")
+                    
+                    with col3:
+                        st.markdown("**🎪 Dynamic Attendance**")
+                        st.markdown(f"### {estimated_attendance:,}")
+                        st.caption(f"Auto-calculated • Update #{hash(refresh_key) % 1000}")
+                        
+                        # Debug indicator
+                        st.caption(f"🔄 Last updated: {refresh_key[-10:]}")
                     
                     # Show attendance calculation details
                     with st.expander("🔍 Attendance Model Details", expanded=False):
@@ -998,47 +1171,71 @@ class AFLDashboard:
                 
                 # Manual override section
                 with st.expander("🔧 Manual Overrides (Optional)", expanded=False):
-                    st.markdown("*Only adjust these if you have specific information that differs from our estimates*")
+                    st.markdown("*Only enable these if you have specific information that differs from our estimates*")
                     
                     override_col1, override_col2, override_col3 = st.columns(3)
                     
                     with override_col1:
-                        home_rest_days = st.number_input(
-                            "Override Home Rest Days", 
-                            min_value=0, max_value=60, 
-                            value=home_rest_days_auto,
-                            help="Days since last match"
-                        )
-                        away_rest_days = st.number_input(
-                            "Override Away Rest Days", 
-                            min_value=0, max_value=60, 
-                            value=away_rest_days_auto,
-                            help="Days since last match"
-                        )
+                        st.markdown("**Rest Days Overrides**")
+                        use_custom_rest = st.checkbox("Override Rest Days", help="Check to manually set rest days")
+                        
+                        if use_custom_rest:
+                            home_rest_days = st.number_input(
+                                "Home Rest Days", 
+                                min_value=0, max_value=60, 
+                                value=home_rest_days_auto,
+                                help="Days since last match"
+                            )
+                            away_rest_days = st.number_input(
+                                "Away Rest Days", 
+                                min_value=0, max_value=60, 
+                                value=away_rest_days_auto,
+                                help="Days since last match"
+                            )
+                        else:
+                            # Use auto-calculated values
+                            home_rest_days = home_rest_days_auto
+                            away_rest_days = away_rest_days_auto
+                            st.info(f"Using auto: Home {home_rest_days} days, Away {away_rest_days} days")
                     
                     with override_col2:
-                        season_round = st.number_input(
-                            "Override Season Round", 
-                            min_value=1, max_value=25, 
-                            value=estimated_round,
-                            help="1-23 regular season, 24-25 finals"
-                        )
-                        year = st.number_input(
-                            "Override Year", 
-                            min_value=2020, max_value=2030, 
-                            value=match_date.year,
-                            help="Year of the match"
-                        )
+                        st.markdown("**Season Info Overrides**")
+                        use_custom_season = st.checkbox("Override Season Info", help="Check to manually set round/year")
+                        
+                        if use_custom_season:
+                            season_round = st.number_input(
+                                "Season Round", 
+                                min_value=1, max_value=25, 
+                                value=estimated_round,
+                                help="1-23 regular season, 24-25 finals"
+                            )
+                            year = st.number_input(
+                                "Year", 
+                                min_value=2020, max_value=2030, 
+                                value=match_date.year,
+                                help="Year of the match"
+                            )
+                        else:
+                            # Use auto-calculated values
+                            season_round = estimated_round
+                            year = match_date.year
+                            st.info(f"Using auto: Round {season_round}, Year {year}")
                     
                     with override_col3:
-                        # Simple override - defaults to auto-calculated value
-                        attendance = st.number_input(
-                            "Override Attendance", 
-                            min_value=1000, max_value=100000, 
-                            value=estimated_attendance,
-                            help="Uses auto-calculated value by default. Change only if needed.",
-                            key=f'attendance_input_{selection_key}'
-                        )
+                        st.markdown("**Attendance Override**")
+                        use_custom_attendance = st.checkbox("Override Attendance", help="Check to manually set attendance")
+                        
+                        if use_custom_attendance:
+                            attendance = st.number_input(
+                                "Attendance", 
+                                min_value=1000, max_value=100000, 
+                                value=estimated_attendance,
+                                help="Manual attendance figure"
+                            )
+                        else:
+                            # Use auto-calculated value
+                            attendance = estimated_attendance
+                            st.info(f"Using auto: {attendance:,} attendees")
             else:
                 # Fallback if selections aren't complete
                 home_rest_days = away_rest_days = 7
@@ -1059,99 +1256,309 @@ class AFLDashboard:
                         st.info("This could be due to insufficient historical data for the selected teams or an invalid date.")
                         st.stop()
                     
-                    # Display results
-                    st.subheader("📊 Prediction Results")
+                    # Store prediction results in session state for persistence
+                    st.session_state.prediction_result = prediction_result
+                    st.session_state.prediction_teams = {'home': home_team, 'away': away_team}
                     
-                    col1, col2, col3 = st.columns(3)
+            # Check if we have stored prediction results to display
+            if 'prediction_result' in st.session_state and 'prediction_teams' in st.session_state:
+                prediction_result = st.session_state.prediction_result
+                stored_teams = st.session_state.prediction_teams
+                
+                # Display results
+                st.subheader("📊 Prediction Results")
+                st.info(f"Showing prediction for: {stored_teams['home']} vs {stored_teams['away']}")
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric(
+                        label="Predicted Winner",
+                        value=prediction_result['winner'],
+                        delta=prediction_result['winner_confidence']
+                    )
+                
+                with col2:
+                    st.metric(
+                        label="Predicted Margin",
+                        value=f"{prediction_result['margin']:.1f} points",
+                        delta=f"±{prediction_result['margin_confidence']:.1f}"
+                    )
+                
+                with col3:
+                    st.metric(
+                        label="Model Confidence",
+                        value=f"{prediction_result['overall_confidence']:.1%}"
+                    )
                     
-                    with col1:
-                        st.metric(
-                            label="Predicted Winner",
-                            value=prediction_result['winner'],
-                            delta=prediction_result['winner_confidence']
-                        )
+                # Detailed breakdown
+                st.subheader("🔍 Prediction Breakdown")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    # Winner probability breakdown
+                    fig_winner = px.pie(
+                        values=[prediction_result['home_prob'], prediction_result['away_prob'], prediction_result['draw_prob']],
+                        names=['Home Win', 'Away Win', 'Draw'],
+                        title="Winner Probability Distribution"
+                    )
+                    st.plotly_chart(fig_winner, use_container_width=True)
                     
-                    with col2:
-                        st.metric(
-                            label="Predicted Margin",
-                            value=f"{prediction_result['margin']:.1f} points",
-                            delta=f"±{prediction_result['margin_confidence']:.1f}"
-                        )
+                    # Add note about draws
+                    st.caption(f"📝 Note: Draws are rare in AFL (~{prediction_result['draw_prob']:.1%}). "
+                             f"This probability increases for very close margins.")
+                
+                with col2:
+                    # Margin distribution (uncertainty around prediction)
+                    predicted_margin = prediction_result['margin']
+                    margin_uncertainty = prediction_result['margin_confidence']
                     
-                    with col3:
-                        st.metric(
-                            label="Model Confidence",
-                            value=f"{prediction_result['overall_confidence']:.1%}"
-                        )
+                    # Generate realistic margin samples around the prediction
+                    margin_samples = np.random.normal(
+                        predicted_margin, 
+                        margin_uncertainty, 
+                        1000
+                    )
                     
-                    # Detailed breakdown
-                    st.subheader("🔍 Prediction Breakdown")
+                    # Cap samples at realistic AFL margins (-150 to +150)
+                    margin_samples = np.clip(margin_samples, -150, 150)
                     
+                    fig_margin = px.histogram(
+                        x=margin_samples,
+                        nbins=30,
+                        title=f"Predicted Margin Distribution<br><sub>Mean: {predicted_margin:.1f} ± {margin_uncertainty:.1f} points</sub>",
+                        labels={'x': 'Margin (points)', 'y': 'Frequency'}
+                    )
+                    fig_margin.add_vline(x=0, line_dash="dash", line_color="red", 
+                                       annotation_text="Draw line")
+                    fig_margin.add_vline(x=predicted_margin, line_dash="dot", line_color="blue",
+                                       annotation_text=f"Prediction: {predicted_margin:.1f}")
+                    st.plotly_chart(fig_margin, use_container_width=True)
+                    
+                    # Add explanation
+                    st.caption("📖 This shows the uncertainty around the predicted margin. The bell curve represents the range of possible outcomes based on model confidence.")
+                    
+                # Feature importance for this prediction
+                st.subheader("🔍 Key Factors")
+                
+                if prediction_result.get('feature_importance'):
+                    top_features = sorted(
+                        prediction_result['feature_importance'].items(),
+                        key=lambda x: abs(x[1]),
+                        reverse=True
+                    )[:10]
+                    
+                    feature_df = pd.DataFrame(top_features, columns=['Feature', 'Importance'])
+                    
+                    fig_features = px.bar(
+                        feature_df,
+                        x='Importance',
+                        y='Feature',
+                        orientation='h',
+                        title="Top Features Influencing This Prediction"
+                    )
+                    st.plotly_chart(fig_features, use_container_width=True)
+                    
+                # Betting odds analysis
+                st.subheader("💰 Betting Analysis & Fair Odds")
+                
+                betting_analysis = self._calculate_betting_odds(prediction_result)
+                
+                if betting_analysis:
+                    # Simple decimal odds display
+                    st.markdown(f"**Fair Decimal Odds:**")
                     col1, col2 = st.columns(2)
-                    
                     with col1:
-                        # Winner probability breakdown
-                        fig_winner = px.pie(
-                            values=[prediction_result['home_prob'], prediction_result['away_prob'], prediction_result['draw_prob']],
-                            names=['Home Win', 'Away Win', 'Draw'],
-                            title="Winner Probability Distribution"
-                        )
-                        st.plotly_chart(fig_winner, use_container_width=True)
-                        
-                        # Add note about draws
-                        st.caption(f"📝 Note: Draws are rare in AFL (~{prediction_result['draw_prob']:.1%}). "
-                                 f"This probability increases for very close margins.")
-                    
+                        st.metric(f"{stored_teams['home']} Win", f"${betting_analysis['home_fair_decimal']:.2f}")
                     with col2:
-                        # Margin distribution (uncertainty around prediction)
-                        predicted_margin = prediction_result['margin']
-                        margin_uncertainty = prediction_result['margin_confidence']
-                        
-                        # Generate realistic margin samples around the prediction
-                        margin_samples = np.random.normal(
-                            predicted_margin, 
-                            margin_uncertainty, 
-                            1000
-                        )
-                        
-                        # Cap samples at realistic AFL margins (-150 to +150)
-                        margin_samples = np.clip(margin_samples, -150, 150)
-                        
-                        fig_margin = px.histogram(
-                            x=margin_samples,
-                            nbins=30,
-                            title=f"Predicted Margin Distribution<br><sub>Mean: {predicted_margin:.1f} ± {margin_uncertainty:.1f} points</sub>",
-                            labels={'x': 'Margin (points)', 'y': 'Frequency'}
-                        )
-                        fig_margin.add_vline(x=0, line_dash="dash", line_color="red", 
-                                           annotation_text="Draw line")
-                        fig_margin.add_vline(x=predicted_margin, line_dash="dot", line_color="blue",
-                                           annotation_text=f"Prediction: {predicted_margin:.1f}")
-                        st.plotly_chart(fig_margin, use_container_width=True)
-                        
-                        # Add explanation
-                        st.caption("📖 This shows the uncertainty around the predicted margin. The bell curve represents the range of possible outcomes based on model confidence.")
+                        st.metric(f"{stored_teams['away']} Win", f"${betting_analysis['away_fair_decimal']:.2f}")
                     
-                    # Feature importance for this prediction
-                    st.subheader("🔍 Key Factors")
+                    # Simple Edge Calculator
+                    st.subheader("🎯 Betting Edge Calculator")
+                    st.markdown("*Enter bookmaker odds to calculate your edge:*")
                     
-                    if prediction_result.get('feature_importance'):
-                        top_features = sorted(
-                            prediction_result['feature_importance'].items(),
-                            key=lambda x: abs(x[1]),
-                            reverse=True
-                        )[:10]
-                        
-                        feature_df = pd.DataFrame(top_features, columns=['Feature', 'Importance'])
-                        
-                        fig_features = px.bar(
-                            feature_df,
-                            x='Importance',
-                            y='Feature',
-                            orientation='h',
-                            title="Top Features Influencing This Prediction"
+                    edge_col1, edge_col2 = st.columns(2)
+                    
+                    with edge_col1:
+                        st.markdown(f"**{stored_teams['home']} Edge**")
+                        bookmaker_home = st.number_input(
+                            "Bookmaker Odds",
+                            min_value=1.01,
+                            max_value=20.0,
+                            value=round(betting_analysis['home_fair_decimal'], 2),
+                            step=0.01,
+                            key="home_odds"
                         )
-                        st.plotly_chart(fig_features, use_container_width=True)
+                        
+                        # Calculate edge
+                        if bookmaker_home > 0:
+                            fair_prob = 1 / betting_analysis['home_fair_decimal']
+                            bookmaker_prob = 1 / bookmaker_home
+                            edge = (fair_prob - bookmaker_prob) / bookmaker_prob * 100
+                            
+                            if edge > 5:
+                                st.success(f"🟢 **+{edge:.1f}% Edge - Good Bet!**")
+                            elif edge > 0:
+                                st.warning(f"🟡 **+{edge:.1f}% Edge - Small**")
+                            else:
+                                st.error(f"🔴 **{edge:.1f}% Edge - Poor Value**")
+                    
+                    with edge_col2:
+                        st.markdown(f"**{stored_teams['away']} Edge**")
+                        bookmaker_away = st.number_input(
+                            "Bookmaker Odds",
+                            min_value=1.01,
+                            max_value=20.0,
+                            value=round(betting_analysis['away_fair_decimal'], 2),
+                            step=0.01,
+                            key="away_odds"
+                        )
+                        
+                        # Calculate edge
+                        if bookmaker_away > 0:
+                            fair_prob = 1 / betting_analysis['away_fair_decimal']
+                            bookmaker_prob = 1 / bookmaker_away
+                            edge = (fair_prob - bookmaker_prob) / bookmaker_prob * 100
+                            
+                            if edge > 5:
+                                st.success(f"🟢 **+{edge:.1f}% Edge - Good Bet!**")
+                            elif edge > 0:
+                                st.warning(f"🟡 **+{edge:.1f}% Edge - Small**")
+                            else:
+                                st.error(f"🔴 **{edge:.1f}% Edge - Poor Value**")
+                
+                else:
+                    st.error("Unable to calculate betting odds")
+            
+            # Round predictions
+            st.subheader("🏆 Round-by-Round Predictions")
+            st.markdown("*Predict all matches in a specific round at once*")
+            
+            # Create round fixture data
+            round_fixtures = {
+                23: [
+                    {"home": "Essendon", "away": "St Kilda", "venue": "Marvel Stadium (Docklands)", "date": "2025-08-15", "time": "7:20pm"},
+                    {"home": "Fremantle", "away": "Brisbane Lions", "venue": "Optus Stadium (Perth Stadium)", "date": "2025-08-15", "time": "8:20pm"},
+                    {"home": "Gold Coast", "away": "GWS Giants", "venue": "People First Stadium (Carrara)", "date": "2025-08-16", "time": "12:35pm"},
+                    {"home": "Carlton", "away": "Port Adelaide", "venue": "Marvel Stadium (Docklands)", "date": "2025-08-16", "time": "1:20pm"},
+                    {"home": "Hawthorn", "away": "Melbourne", "venue": "MCG (Melbourne Cricket Ground)", "date": "2025-08-16", "time": "4:15pm"},
+                    {"home": "Adelaide", "away": "Collingwood", "venue": "Adelaide Oval", "date": "2025-08-16", "time": "7:35pm"},
+                    {"home": "North Melbourne", "away": "Richmond", "venue": "Ninja Stadium (North Melbourne)", "date": "2025-08-17", "time": "1:10pm"},
+                    {"home": "Sydney Swans", "away": "Geelong", "venue": "SCG (Sydney Cricket Ground)", "date": "2025-08-17", "time": "3:15pm"},
+                    {"home": "Western Bulldogs", "away": "West Coast Eagles", "venue": "Marvel Stadium (Docklands)", "date": "2025-08-17", "time": "4:40pm"}
+                ],
+                24: [
+                    {"home": "Essendon", "away": "Carlton", "venue": "MCG (Melbourne Cricket Ground)", "date": "2025-08-21", "time": "7:30pm"},
+                    {"home": "Collingwood", "away": "Melbourne", "venue": "MCG (Melbourne Cricket Ground)", "date": "2025-08-22", "time": "7:10pm"},
+                    {"home": "Port Adelaide", "away": "Gold Coast", "venue": "Adelaide Oval", "date": "2025-08-22", "time": "8:10pm"},
+                    {"home": "North Melbourne", "away": "Adelaide", "venue": "Marvel Stadium (Docklands)", "date": "2025-08-23", "time": "1:20pm"},
+                    {"home": "Richmond", "away": "Geelong", "venue": "MCG (Melbourne Cricket Ground)", "date": "2025-08-23", "time": "4:15pm"},
+                    {"home": "West Coast Eagles", "away": "Sydney Swans", "venue": "Optus Stadium (Perth Stadium)", "date": "2025-08-23", "time": "7:35pm"},
+                    {"home": "GWS Giants", "away": "St Kilda", "venue": "Giants Stadium (ENGIE Stadium)", "date": "2025-08-24", "time": "12:20pm"},
+                    {"home": "Western Bulldogs", "away": "Fremantle", "venue": "Marvel Stadium (Docklands)", "date": "2025-08-24", "time": "3:15pm"},
+                    {"home": "Brisbane Lions", "away": "Hawthorn", "venue": "The Gabba (Brisbane Cricket Ground)", "date": "2025-08-24", "time": "7:20pm"},
+                    {"home": "Gold Coast", "away": "Essendon", "venue": "People First Stadium (Carrara)", "date": "2025-08-27", "time": "7:20pm"}
+                ]
+            }
+            
+            # Round selector
+            selected_round = st.selectbox(
+                "Select Round",
+                options=list(round_fixtures.keys()),
+                index=0,  # Default to Round 23
+                help="Choose which round to predict"
+            )
+            
+            if st.button("🎯 Predict Entire Round", type="primary"):
+                if selected_round in round_fixtures:
+                    with st.spinner(f"Generating predictions for Round {selected_round}..."):
+                        round_results = []
+                        
+                        # Process each match in the round
+                        for match in round_fixtures[selected_round]:
+                            # Calculate parameters for this match
+                            match_date_obj = pd.to_datetime(match['date'])
+                            
+                            # Load current database for rest days
+                            import sqlite3
+                            conn = sqlite3.connect('afl_data/afl_database.db')
+                            current_matches = pd.read_sql_query('SELECT * FROM matches WHERE year = 2025', conn)
+                            conn.close()
+                            
+                            home_rest = self._calculate_rest_days_from_df(match['home'], match['date'], current_matches)
+                            away_rest = self._calculate_rest_days_from_df(match['away'], match['date'], current_matches)
+                            estimated_attendance = self._estimate_attendance(match['home'], match['away'], match['venue'], match['date'])
+                            
+                            # Generate prediction
+                            prediction = self.generate_prediction(
+                                match['home'], match['away'], match['venue'], match_date_obj,
+                                home_rest, away_rest, selected_round, 2025, estimated_attendance
+                            )
+                            
+                            if prediction:
+                                # Calculate betting odds
+                                betting_odds = self._calculate_betting_odds(prediction)
+                                
+                                round_results.append({
+                                    'match': f"{match['home']} vs {match['away']}",
+                                    'venue': match['venue'].split('(')[0].strip(),  # Simplified venue name
+                                    'date': match['date'],
+                                    'time': match['time'],
+                                    'predicted_winner': prediction['winner'],
+                                    'margin': prediction['margin'],
+                                    'confidence': prediction['overall_confidence'],
+                                    'home_odds': betting_odds['home_fair_decimal'] if betting_odds else None,
+                                    'away_odds': betting_odds['away_fair_decimal'] if betting_odds else None,
+                                    'home_team': match['home'],
+                                    'away_team': match['away']
+                                })
+                        
+                        # Display results in a clean table format
+                        if round_results:
+                            st.success(f"✅ Round {selected_round} Predictions Complete!")
+                            
+                            # Create summary table
+                            summary_data = []
+                            for result in round_results:
+                                winner_symbol = "🏠" if result['predicted_winner'] == result['home_team'] else "🛣️"
+                                
+                                summary_data.append({
+                                    "Match": result['match'],
+                                    "Venue": result['venue'],
+                                    "Date & Time": f"{result['date']} {result['time']}",
+                                    "Predicted Winner": f"{winner_symbol} {result['predicted_winner']}",
+                                    "Margin": f"{result['margin']:.1f} pts",
+                                    "Confidence": f"{result['confidence']:.1%}",
+                                    "Home Odds": f"${result['home_odds']:.2f}" if result['home_odds'] else "N/A",
+                                    "Away Odds": f"${result['away_odds']:.2f}" if result['away_odds'] else "N/A"
+                                })
+                            
+                            # Display as DataFrame
+                            summary_df = pd.DataFrame(summary_data)
+                            st.dataframe(summary_df, use_container_width=True, hide_index=True)
+                            
+                            # Quick stats
+                            col1, col2, col3, col4 = st.columns(4)
+                            
+                            with col1:
+                                home_wins = sum(1 for r in round_results if r['predicted_winner'] == r['home_team'])
+                                st.metric("Home Wins", f"{home_wins}/{len(round_results)}")
+                            
+                            with col2:
+                                avg_margin = sum(abs(r['margin']) for r in round_results) / len(round_results)
+                                st.metric("Avg Margin", f"{avg_margin:.1f} pts")
+                            
+                            with col3:
+                                avg_confidence = sum(r['confidence'] for r in round_results) / len(round_results)
+                                st.metric("Avg Confidence", f"{avg_confidence:.1%}")
+                            
+                            with col4:
+                                close_games = sum(1 for r in round_results if abs(r['margin']) < 10)
+                                st.metric("Close Games (<10pts)", f"{close_games}/{len(round_results)}")
+                
+                else:
+                    st.error(f"Round {selected_round} fixture data not available")
             
             # Batch predictions
             st.subheader("📋 Batch Predictions")
@@ -1268,23 +1675,8 @@ class AFLDashboard:
             winner_probs = winner_model.predict_proba(feature_vector)[0]
             raw_margin = margin_model.predict(feature_vector)[0]
             
-            # Address conservative bias by scaling margins based on confidence
-            margin_confidence = max(winner_probs)
-            
-            # Scale factor: higher confidence = larger margins
-            if margin_confidence > 0.7:  # High confidence
-                margin_scale = 1.4  # Increase margin by 40%
-            elif margin_confidence > 0.6:  # Medium confidence
-                margin_scale = 1.2  # Increase margin by 20%
-            else:  # Low confidence
-                margin_scale = 1.0  # Keep conservative
-            
-            predicted_margin = raw_margin * margin_scale
-            
-            # Debug info for margin scaling
-            if margin_scale > 1.0:
-                st.info(f"🎯 Margin scaling applied: {raw_margin:.1f} → {predicted_margin:.1f} points "
-                       f"(confidence: {margin_confidence:.1%}, scale: {margin_scale:.1f}x)")
+            # Use raw model prediction directly (no scaling needed after margin fix)
+            predicted_margin = raw_margin
             
             # Sanity check: AFL margins are typically 0-150 points
             if abs(predicted_margin) > 150:
@@ -1399,12 +1791,12 @@ class AFLDashboard:
                     if game['home_team'] == team:
                         goals_for.append(game.get('home_total_goals', 12))
                         goals_against.append(game.get('away_total_goals', 12))
-                        margin = game.get('home_total_goals', 12) - game.get('away_total_goals', 12)
+                        margin = (game.get('home_total_goals', 12) * 6 + game.get('home_total_behinds', 6)) - (game.get('away_total_goals', 12) * 6 + game.get('away_total_behinds', 6))
                         wins.append(1 if margin > 0 else 0)
                     else:
                         goals_for.append(game.get('away_total_goals', 12))
                         goals_against.append(game.get('home_total_goals', 12))
-                        margin = game.get('away_total_goals', 12) - game.get('home_total_goals', 12)
+                        margin = (game.get('away_total_goals', 12) * 6 + game.get('away_total_behinds', 6)) - (game.get('home_total_goals', 12) * 6 + game.get('home_total_behinds', 6))
                         wins.append(1 if margin > 0 else 0)
                 
                 # Rolling averages
@@ -1437,11 +1829,11 @@ class AFLDashboard:
                 total_margin = 0
                 for _, game in h2h_matches.iterrows():
                     if game['home_team'] == home_team:
-                        margin = game.get('home_total_goals', 12) - game.get('away_total_goals', 12)
+                        margin = (game.get('home_total_goals', 12) * 6 + game.get('home_total_behinds', 6)) - (game.get('away_total_goals', 12) * 6 + game.get('away_total_behinds', 6))
                         if margin > 0:
                             home_wins += 1
                     else:
-                        margin = game.get('away_total_goals', 12) - game.get('home_total_goals', 12)
+                        margin = (game.get('away_total_goals', 12) * 6 + game.get('away_total_behinds', 6)) - (game.get('home_total_goals', 12) * 6 + game.get('home_total_behinds', 6))
                         if margin > 0:
                             home_wins += 1
                     total_margin += margin
@@ -2007,6 +2399,201 @@ class AFLDashboard:
                     st.success("Training complete. Active model updated.")
                 except Exception as e:
                     st.error(f"Training failed: {e}")
+    
+    def data_management(self):
+        """Data management and scraping tools page."""
+        st.title("🔄 Data Management")
+        st.markdown("Keep your AFL data up-to-date with automated scraping and validation tools.")
+        
+        # Data status overview
+        st.header("📊 Current Data Status")
+        
+        try:
+            # Check database connection
+            conn = sqlite3.connect('afl_data/afl_database.db')
+            
+            # Get data statistics
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                # Total matches
+                total_matches = pd.read_sql_query('SELECT COUNT(*) as count FROM matches', conn).iloc[0]['count']
+                st.metric("Total Matches", f"{total_matches:,}")
+            
+            with col2:
+                # Total player records
+                total_players = pd.read_sql_query('SELECT COUNT(*) as count FROM players', conn).iloc[0]['count']
+                st.metric("Player Records", f"{total_players:,}")
+            
+            with col3:
+                # Latest match date
+                latest_match = pd.read_sql_query('SELECT MAX(date) as latest FROM matches', conn).iloc[0]['latest']
+                st.metric("Latest Match", latest_match if latest_match else "N/A")
+            
+            with col4:
+                # 2025 data coverage
+                matches_2025 = pd.read_sql_query('SELECT COUNT(*) as count FROM matches WHERE year = 2025', conn).iloc[0]['count']
+                st.metric("2025 Matches", matches_2025)
+            
+            # Data completeness check
+            st.header("🔍 Data Completeness Analysis")
+            
+            # Check for missing player data
+            player_coverage = pd.read_sql_query('''
+                SELECT year, COUNT(*) as player_records, COUNT(DISTINCT round) as rounds_covered
+                FROM players 
+                WHERE year >= 2024
+                GROUP BY year 
+                ORDER BY year DESC
+            ''', conn)
+            
+            st.subheader("Recent Player Data Coverage")
+            st.dataframe(player_coverage, use_container_width=True)
+            
+            # Check for data gaps
+            matches_by_round_2025 = pd.read_sql_query('''
+                SELECT round, COUNT(*) as matches, COUNT(DISTINCT home_team) + COUNT(DISTINCT away_team) as teams
+                FROM matches 
+                WHERE year = 2025 
+                GROUP BY round 
+                ORDER BY round
+            ''', conn)
+            
+            if len(matches_by_round_2025) > 0:
+                st.subheader("2025 Season Round Coverage")
+                fig = px.bar(matches_by_round_2025, x='round', y='matches', 
+                           title='Matches per Round in 2025 Season',
+                           labels={'round': 'Round', 'matches': 'Number of Matches'})
+                st.plotly_chart(fig, use_container_width=True)
+            
+            conn.close()
+            
+        except Exception as e:
+            st.error(f"Error accessing database: {e}")
+        
+        # Data update tools
+        st.header("🛠️ Data Update Tools")
+        
+        tab1, tab2, tab3 = st.tabs(["🏈 Player Data Scraper", "🔄 Hybrid Pipeline", "📊 Data Validation"])
+        
+        with tab1:
+            st.subheader("Individual Player Statistics Scraper")
+            st.markdown("Scrape detailed player performance data from AFL Tables for missing rounds.")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🚀 Run Player Data Scraper", type="primary"):
+                    with st.spinner("Scraping player data... This may take several minutes."):
+                        try:
+                            # Import and run the player scraper
+                            import sys
+                            sys.path.append('scripts')
+                            from simple_player_scraper import SimplePlayerScraper
+                            
+                            scraper = SimplePlayerScraper()
+                            player_data = scraper.scrape_all_matches()
+                            
+                            if player_data:
+                                scraper.store_player_data(player_data)
+                                st.success(f"✅ Successfully scraped and stored {len(player_data)} player records!")
+                                st.balloons()
+                            else:
+                                st.warning("No new player data found to scrape.")
+                                
+                        except Exception as e:
+                            st.error(f"Scraping failed: {e}")
+            
+            with col2:
+                st.info("**What this does:**\n- Scrapes individual player statistics from AFL Tables\n- Covers rounds 5-23 for 2025 season\n- Includes kicks, marks, handballs, goals, etc.\n- Automatically stores in database")
+        
+        with tab2:
+            st.subheader("Hybrid Evergreen Pipeline")
+            st.markdown("Intelligent data pipeline that combines repository data with real-time scraping.")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🔄 Run Hybrid Pipeline", type="primary"):
+                    with st.spinner("Running hybrid data pipeline..."):
+                        try:
+                            import sys
+                            sys.path.append('scripts')
+                            from hybrid_data_pipeline import run_hybrid_pipeline
+                            
+                            result = run_hybrid_pipeline()
+                            st.success("✅ Hybrid pipeline completed successfully!")
+                            st.json(result)
+                            
+                        except Exception as e:
+                            st.error(f"Pipeline failed: {e}")
+            
+            with col2:
+                st.info("**What this does:**\n- Detects data cutoff automatically\n- Uses repository for historical data\n- Scrapes current season data\n- Validates and merges data sources")
+        
+        with tab3:
+            st.subheader("Data Quality Validation")
+            st.markdown("Validate data integrity and identify potential issues.")
+            
+            if st.button("🔍 Run Data Validation"):
+                with st.spinner("Validating data quality..."):
+                    try:
+                        conn = sqlite3.connect('afl_data/afl_database.db')
+                        
+                        # Check for duplicate matches
+                        duplicates = pd.read_sql_query('''
+                            SELECT date, home_team, away_team, COUNT(*) as count
+                            FROM matches 
+                            GROUP BY date, home_team, away_team 
+                            HAVING COUNT(*) > 1
+                        ''', conn)
+                        
+                        if len(duplicates) > 0:
+                            st.warning(f"Found {len(duplicates)} potential duplicate matches:")
+                            st.dataframe(duplicates)
+                        else:
+                            st.success("✅ No duplicate matches found")
+                        
+                        # Check for missing player names
+                        missing_names = pd.read_sql_query('''
+                            SELECT year, round, COUNT(*) as records_without_names
+                            FROM players 
+                            WHERE player_name IS NULL OR player_name = ''
+                            GROUP BY year, round
+                            ORDER BY year DESC, round DESC
+                        ''', conn)
+                        
+                        if len(missing_names) > 0:
+                            st.warning("Player records missing names:")
+                            st.dataframe(missing_names.head(10))
+                        else:
+                            st.success("✅ All player records have names")
+                        
+                        # Check data consistency
+                        st.success("✅ Data validation completed")
+                        
+                        conn.close()
+                        
+                    except Exception as e:
+                        st.error(f"Validation failed: {e}")
+        
+        # Quick actions
+        st.header("⚡ Quick Actions")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if st.button("📈 Retrain Models"):
+                st.info("Redirecting to Train Models page...")
+                st.rerun()
+        
+        with col2:
+            if st.button("🏠 Back to Dashboard"):
+                st.info("Redirecting to Dashboard...")
+                st.rerun()
+        
+        with col3:
+            if st.button("📊 View Data"):
+                st.info("Redirecting to Data Exploration...")
+                st.rerun()
     
     def help_documentation(self):
         """Help and documentation page."""

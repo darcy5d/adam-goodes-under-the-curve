@@ -40,8 +40,8 @@ class CleanAFLModel:
         # Convert date column
         matches_df['date'] = pd.to_datetime(matches_df['date'], errors='coerce')
         
-        # Calculate margin (home_goals - away_goals)
-        matches_df['margin'] = matches_df['home_total_goals'] - matches_df['away_total_goals']
+        # Calculate margin (home_points - away_points)
+        matches_df['margin'] = (matches_df['home_total_goals'] * 6 + matches_df['home_total_behinds']) - (matches_df['away_total_goals'] * 6 + matches_df['away_total_behinds'])
         matches_df['margin'] = matches_df['margin'].fillna(0)
         
         print(f"Loaded {len(matches_df)} matches")
